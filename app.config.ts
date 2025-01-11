@@ -20,6 +20,9 @@ export default () => {
           "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera"
         }
       },
+      "androidStatusBar": {
+        "translucent": true,
+      },
       "android": {
         "adaptiveIcon": {
           "foregroundImage": "./src/assets/images/branding/adaptive-icon.png",
@@ -55,7 +58,7 @@ export default () => {
         [
           "expo-splash-screen",
           {
-            "image": "./src/assets/images/branding/splash-icon.png",
+            "image": "./src/assets/images/branding/splash.png",
             "imageWidth": 200,
             "resizeMode": "contain",
             "backgroundColor": "#ffffff"
