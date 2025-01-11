@@ -10,7 +10,7 @@ export default () => {
       "slug": "cityride",
       "version": "1.0.0",
       "orientation": "portrait",
-      "icon": "./src/assets/images/icon.png",
+      "icon": "./src/assets/images/branding/icon.png",
       "scheme": "cityride",
       "userInterfaceStyle": "automatic",
       "newArchEnabled": true,
@@ -22,7 +22,7 @@ export default () => {
       },
       "android": {
         "adaptiveIcon": {
-          "foregroundImage": "./src/assets/images/adaptive-icon.png",
+          "foregroundImage": "./src/assets/images/branding/adaptive-icon.png",
           "backgroundColor": "#ffffff"
         },
         "config": {
@@ -55,7 +55,7 @@ export default () => {
         [
           "expo-splash-screen",
           {
-            "image": "./src/assets/images/splash-icon.png",
+            "image": "./src/assets/images/branding/splash-icon.png",
             "imageWidth": 200,
             "resizeMode": "contain",
             "backgroundColor": "#ffffff"
