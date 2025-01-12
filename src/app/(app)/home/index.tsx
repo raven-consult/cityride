@@ -1,34 +1,21 @@
 import React from "react";
 
-import { View, Text, StatusBar, Pressable, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 
-import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 
-import Feather from "@expo/vector-icons/Feather";
-
-import { RideProvider } from "./context";
+import AppBar from "./_components/AppBar";
 import BottomSheet from "./_components/BottomSheet";
 
 
 const Home = (): JSX.Element => {
-  const router = useRouter();
-
-  const onPressMenu = () => router.push("/(app)/profile");
 
   return (
-    <RideProvider>
-      <View style={styles.container}>
-        <StatusBar backgroundColor="transparent" />
-        <View style={styles.menuContainer}>
-          <Pressable onPress={onPressMenu} style={styles.menuButtonContainer}>
-            <Feather name="menu" size={24} color="black" />
-          </Pressable>
-        </View>
-
-        <Text>Home</Text>
-        <BottomSheet />
-      </View>
-    </RideProvider>
+    <View style={styles.container}>
+      <StatusBar style="dark" translucent />
+      <AppBar />
+      <Text>Home</Text>
+    </View>
   );
 };
 
@@ -37,16 +24,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "red",
   },
-  menuContainer: {
-    left: 12,
-    position: "absolute",
-    top: (StatusBar.currentHeight || 32) + 10,
-  },
-  menuButtonContainer: {
-    padding: 8,
-    borderRadius: 6,
-    backgroundColor: "white",
-  }
 });
 
 
