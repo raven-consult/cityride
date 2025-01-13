@@ -6,7 +6,9 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
-import useDMSans from "@/design-system/fonts/DM_Sans";
+import RideProvider from "@/context/ride";
+import RideInfo from "@/components/RideInfo";
+import useDMSans from "@/design/fonts/DM_Sans";
 
 
 // SplashScreen.preventAutoHideAsync();
@@ -26,17 +28,20 @@ const RootLayout = (): JSX.Element => {
 
   return (
     <GestureHandlerRootView>
-      <Stack screenOptions={{
-        contentStyle: {
-          backgroundColor: "white",
-        },
-        animation: "fade",
-        headerShown: false,
-        statusBarStyle: "dark",
-      }}>
-        <Stack.Screen name="(app)" />
-        <Stack.Screen name="(onboarding)" />
-      </Stack>
+      <RideProvider>
+        <Stack screenOptions={{
+          contentStyle: {
+            backgroundColor: "white",
+          },
+          animation: "fade",
+          headerShown: false,
+          statusBarStyle: "dark",
+        }}>
+          <Stack.Screen name="(app)" />
+          <Stack.Screen name="(onboarding)" />
+        </Stack>
+        <RideInfo />
+      </RideProvider>
     </GestureHandlerRootView>
   );
 };

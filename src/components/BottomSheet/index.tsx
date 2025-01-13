@@ -1,51 +1,42 @@
 import React from "react";
 
-import { View, Text, TextInput, StyleSheet } from "react-native";
+import { View, Text, TextInput, StyleSheet, Pressable } from "react-native";
 
 import { Image } from "expo-image";
+
 import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gorhom/bottom-sheet";
+
+import { Ride } from "@/types";
+import { useRide } from "@/context/ride";
 
 import FlagIcon from "@/assets/icons/flag.svg";
 import SearchIcon from "@/assets/icons/search.svg";
 import ChevronIcon from "@/assets/icons/chevron.svg";
 
 
-const RideItem = (): JSX.Element => {
-  return (
-    <View style={{ minHeight: 60, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-      <View style={{ padding: 12 }}>
-        <Image
-          source={FlagIcon}
-          style={{ width: 24, height: 24 }}
-        />
-      </View>
-      <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", borderBottomWidth: 1, borderColor: "hsl(0, 0%, 90%)" }}>
-        <View style={{ flex: 1, gap: 1.5, width: "100%" }}>
-          <Text style={textStyles.rideItemTitle}>PO124AC</Text>
-          <View style={{ flexDirection: "row", gap: 6 }}>
-            <Text style={[textStyles.rideItemSubtitle, { fontFamily: "DMSans-SemiBold" }]}>₦500</Text>
-            <Text style={textStyles.rideItemSubtitle}>•</Text>
-            <Text style={textStyles.rideItemSubtitle}>Lekki Phase One</Text>
-          </View>
-        </View>
-        <View style={{ padding: 12 }}>
-          <Image
-            source={ChevronIcon}
-            style={{ width: 24, height: 24 }}
-          />
-        </View>
-      </View>
-    </View>
-  );
-};
-
 const BottomSheet = (): JSX.Element => {
+  const { ride, setCurrentRide } = useRide();
+  const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const snapPoints = React.useMemo(() => ["15%", "30%"], []);
+
+  React.useEffect(() => {
+    if (ride) {
+      bottomSheetRef.current?.close();
+    } else {
+      bottomSheetRef.current?.snapToIndex(0);
+    }
+  }, [ride]);
+
+  const onPressItem = () => {
+    console.log("Item Pressed");
+    setCurrentRide({} as Ride);
+  }
 
   return (
     <RNBottomSheet
       index={1}
       enableDynamicSizing
+      ref={bottomSheetRef}
       snapPoints={snapPoints}
       handleComponent={() => null}
       enablePanDownToClose={false}
@@ -73,12 +64,12 @@ const BottomSheet = (): JSX.Element => {
 
         <View style={{ gap: 10, paddingHorizontal: 16 }}>
           <Text style={textStyles.nearbyRidesText}>Nearby Rides</Text>
-          <RideItem />
-          <RideItem />
-          <RideItem />
-          <RideItem />
-          <RideItem />
-          <RideItem />
+          {Array.from({ length: 8 }).map((_, index) => (
+            <RideItem
+              key={index}
+              onPress={onPressItem}
+            />
+          ))}
         </View>
       </BottomSheetView>
     </RNBottomSheet>
@@ -94,6 +85,43 @@ const BottomSheetBackground = ({ style }: BottomSheetBackgroundProps) => {
 
 
 export default BottomSheet;
+
+
+interface RideItemProps {
+  price?: string;
+  rideId?: string;
+  destination?: string;
+  onPress?: () => void;
+}
+
+const RideItem = ({ price, rideId, destination, onPress }: RideItemProps): JSX.Element => {
+  return (
+    <Pressable onPress={onPress} style={{ minHeight: 60, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+      <View style={{ padding: 12 }}>
+        <Image
+          source={FlagIcon}
+          style={{ width: 24, height: 24 }}
+        />
+      </View>
+      <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", borderBottomWidth: 1, borderColor: "hsl(0, 0%, 90%)" }}>
+        <View style={{ flex: 1, gap: 1.5, width: "100%" }}>
+          <Text style={textStyles.rideItemTitle}>PO124AC</Text>
+          <View style={{ flexDirection: "row", gap: 6 }}>
+            <Text style={[textStyles.rideItemSubtitle, { fontFamily: "DMSans-SemiBold" }]}>₦500</Text>
+            <Text style={textStyles.rideItemSubtitle}>•</Text>
+            <Text style={textStyles.rideItemSubtitle}>Lekki Phase One</Text>
+          </View>
+        </View>
+        <View style={{ padding: 12 }}>
+          <Image
+            source={ChevronIcon}
+            style={{ width: 24, height: 24 }}
+          />
+        </View>
+      </View>
+    </Pressable>
+  );
+};
 
 
 const textStyles = StyleSheet.create({
