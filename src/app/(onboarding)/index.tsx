@@ -1,22 +1,15 @@
 import React from "react";
 
-import { Text, View, StyleSheet, Button } from "react-native";
+import { Text, View, StyleSheet, Pressable } from "react-native";
 
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { StatusBar } from "expo-status-bar";
+import { LinearGradient } from "expo-linear-gradient";
 
-import Typography from "@/design-system/theme/typography";
-import WeddingOnboardingImg from "@/assets/images/wedding-onboarding.jpg";
-
-const strings = {
-  title: "City Ride",
-  ctaButton: "Get Started",
-  description: "City Ride is a ride-sharing app that helps you get around the city with ease.",
-}
+import SplashScreenPng from "@/assets/images/static/splash-screen.png";
 
 
-export default function Index() {
+const Index = () => {
   const router = useRouter();
 
   const signIn = React.useCallback(async () => {
@@ -25,24 +18,59 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <StatusBar hidden />
-      <Image style={styles.onboardingImg} source={WeddingOnboardingImg} />
-      <View style={styles.mainContainer}>
-        <View style={styles.textContainer}>
-          <Text style={[Typography.mainHeading, styles.mainText]}>
-            {strings.title}
-          </Text>
-          <Text style={[Typography.subHeading, styles.subText]}>
-            {strings.description}
-          </Text>
-        </View>
-        <View style={styles.buttonContainer}>
-          <Button onPress={signIn} title={strings.ctaButton} />
+      <Image
+        source={SplashScreenPng}
+        style={{
+          width: "100%",
+          height: "100%",
+        }}
+      />
+
+      <View style={styles.textContainer}>
+        <LinearGradient
+          style={{
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+          }}
+          colors={["rgba(56, 56, 56, 0)", "rgba(0, 0, 0, 1)"]}
+        />
+        <View style={styles.textContent}>
+          <View style={{ gap: 8, alignItems: "center", justifyContent: "center" }}>
+            <Text style={textStyles.mainText}>
+              Find Rides near you across lagos
+            </Text>
+            <Text style={textStyles.subText}>
+              Find Rides near you across lagos
+            </Text>
+          </View>
+          <Pressable style={styles.actionBtn} onPress={signIn}>
+            <Text style={textStyles.subText}>Sign in</Text>
+          </Pressable>
         </View>
       </View>
     </View>
   );
 };
+
+export default Index;
+
+const textStyles = StyleSheet.create({
+  mainText: {
+    fontSize: 40,
+    color: "white",
+    lineHeight: 45,
+    textAlign: "center",
+    fontFamily: "DMSans-SemiBold",
+  },
+  subText: {
+    fontSize: 16,
+    color: "white",
+    fontFamily: "DMSans-Regular",
+  },
+})
 
 
 const styles = StyleSheet.create({
@@ -53,38 +81,30 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "white",
   },
-  onboardingImg: {
-    width: "100%",
-    height: "100%",
-  },
-  mainContainer: {
-    bottom: 0,
-    height: "35%",
-    width: "100%",
-    paddingVertical: 36,
-    position: "absolute",
-    alignItems: "center",
-    flexDirection: "column",
-    justifyContent: "space-between",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
   textContainer: {
-    gap: 8,
-    width: "85%",
+    left: 0,
+    bottom: 0,
+    width: "100%",
+    height: "40%",
+    alignItems: "center",
+    position: "absolute",
+    justifyContent: "flex-end",
   },
-  mainText: {
-    color: "white",
-    textAlign: "center",
-    fontSize: 32,
-    fontWeight: "800",
+  textContent: {
+    gap: 32,
+    height: "100%",
+    width: "100%",
+    paddingBottom: 12,
+    alignItems: "center",
+    paddingHorizontal: 16,
+    justifyContent: "flex-end",
   },
-  subText: {
-    fontSize: 16,
-    color: "white",
-    textAlign: "center",
-    fontFamily: "DMSans-Regular",
-  },
-  buttonContainer: {
-    width: "85%",
-  },
+  actionBtn: {
+    padding: 16,
+    width: "100%",
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "black",
+  }
 });

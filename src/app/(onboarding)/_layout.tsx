@@ -10,6 +10,7 @@ const Layout = (): JSX.Element => {
         backgroundColor: "white",
       },
       headerShown: false,
+      statusBarStyle: "dark",
       statusBarTranslucent: true,
     }} />
   )
