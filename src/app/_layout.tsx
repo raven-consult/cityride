@@ -7,8 +7,10 @@ import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 import RideProvider from "@/context/ride";
+import InfoProvider from "@/context/info";
 import RideInfo from "@/components/RideInfo";
 import useDMSans from "@/design/fonts/DM_Sans";
+import InfoSheet from "@/components/InfoSheet";
 
 
 // SplashScreen.preventAutoHideAsync();
@@ -29,18 +31,22 @@ const RootLayout = (): JSX.Element => {
   return (
     <GestureHandlerRootView>
       <RideProvider>
-        <Stack screenOptions={{
-          contentStyle: {
-            backgroundColor: "white",
-          },
-          animation: "fade",
-          headerShown: false,
-          statusBarStyle: "dark",
-        }}>
-          <Stack.Screen name="(app)" />
-          <Stack.Screen name="(onboarding)" />
-        </Stack>
-        <RideInfo />
+        <InfoProvider>
+          <Stack screenOptions={{
+            contentStyle: {
+              backgroundColor: "white",
+            },
+            animation: "fade",
+            headerShown: false,
+            statusBarStyle: "dark",
+          }}>
+            <Stack.Screen name="(app)" />
+            <Stack.Screen name="(onboarding)" />
+          </Stack>
+
+          <RideInfo />
+          <InfoSheet />
+        </InfoProvider>
       </RideProvider>
     </GestureHandlerRootView>
   );

@@ -11,6 +11,7 @@ import { useRide } from "@/context/ride";
 
 import FlagIcon from "@/assets/icons/flag.svg";
 import SearchIcon from "@/assets/icons/search.svg";
+import CarImg from "@/assets/images/static/car.svg";
 import ChevronIcon from "@/assets/icons/chevron.svg";
 
 
@@ -18,6 +19,8 @@ const BottomSheet = (): JSX.Element => {
   const { ride, setCurrentRide } = useRide();
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const snapPoints = React.useMemo(() => ["15%", "30%"], []);
+
+  const [currentLocation, setCurrentLocation] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (ride) {
@@ -27,8 +30,13 @@ const BottomSheet = (): JSX.Element => {
     }
   }, [ride]);
 
+  React.useEffect(() => {
+    setTimeout(() => {
+      setCurrentLocation("Unilag Bus Stop");
+    }, 3000);
+  }, []);
+
   const onPressItem = () => {
-    console.log("Item Pressed");
     setCurrentRide({} as Ride);
   }
 
@@ -44,7 +52,11 @@ const BottomSheet = (): JSX.Element => {
     >
       <BottomSheetView style={styles.container}>
         <View style={styles.currentLocation}>
-          <Text style={textStyles.currentLocationText}>Unilag Bus Stop</Text>
+          {currentLocation ? (
+            <Text style={textStyles.currentLocationText}>Unilag Bus Stop</Text>
+          ) : (
+            <Text style={textStyles.loadingLocation}>Locating Nearest Bus Stop...</Text>
+          )}
         </View>
 
         <View style={styles.searchContainer}>
@@ -60,6 +72,35 @@ const BottomSheet = (): JSX.Element => {
               style={textStyles.searchContainer}
             />
           </View>
+        </View>
+
+        <View style={styles.driverActionsContainer}>
+          <Pressable style={styles.driverActionsItem}>
+            <View style={{ paddingHorizontal: 8 }}>
+              <Text style={textStyles.driverActionSubtitle}>Create a</Text>
+              <Text style={textStyles.driverActionTitle}>Ride</Text>
+            </View>
+            <Image
+              source={CarImg}
+              style={{
+                width: 68,
+                height: "100%",
+              }}
+            />
+          </Pressable>
+          <Pressable style={styles.driverActionsItem}>
+            <View style={{ paddingHorizontal: 8 }}>
+              <Text style={textStyles.driverActionSubtitle}>Find a</Text>
+              <Text style={textStyles.driverActionTitle}>Ride</Text>
+            </View>
+            <Image
+              source={CarImg}
+              style={{
+                width: 68,
+                height: "100%",
+              }}
+            />
+          </Pressable>
         </View>
 
         <View style={{ gap: 10, paddingHorizontal: 16 }}>
@@ -125,6 +166,10 @@ const RideItem = ({ price, rideId, destination, onPress }: RideItemProps): JSX.E
 
 
 const textStyles = StyleSheet.create({
+  loadingLocation: {
+    fontSize: 14,
+    fontFamily: "DMSans-Italic",
+  },
   rideItemTitle: {
     fontSize: 16,
     fontFamily: "DMSans-SemiBold",
@@ -147,6 +192,14 @@ const textStyles = StyleSheet.create({
   currentLocationText: {
     fontSize: 14,
     fontFamily: "DMSans-SemiBold",
+  },
+  driverActionSubtitle: {
+    fontSize: 14,
+    fontFamily: "DMSans-Regular",
+  },
+  driverActionTitle: {
+    fontSize: 30,
+    fontFamily: "DMSans-SemiBold",
   }
 });
 
@@ -159,9 +212,24 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderBottomWidth: 1,
     alignItems: "center",
-    flexDirection: "row",
     justifyContent: "center",
     borderColor: "hsl(0, 0%, 90%)",
+  },
+  driverActionsContainer: {
+    gap: 24,
+    paddingVertical: 4,
+    flexDirection: "row",
+    paddingHorizontal: 16
+  },
+  driverActionsItem: {
+    flex: 1,
+    height: 72,
+    borderRadius: 12,
+    overflow: "hidden",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "hsl(0, 0%, 95%)",
   },
   searchContainer: {
     paddingHorizontal: 16,

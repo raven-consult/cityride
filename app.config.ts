@@ -60,7 +60,7 @@ export default () => {
           {
             "image": "./src/assets/images/branding/splash.png",
             "imageWidth": 200,
-            "resizeMode": "contain",
+            "resizeMode": "cover",
             "backgroundColor": "#ffffff"
           }
         ],

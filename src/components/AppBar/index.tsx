@@ -23,20 +23,24 @@ const AppBar = (): JSX.Element => {
         locations={[0.6, 1]}
       />
 
-      <View style={styles.textContainer}>
-        <View>
-          <Text style={textStyles.greetingText}>Good Morning,</Text>
-          <Text style={textStyles.mainText}>Damian Akpan</Text>
-        </View>
+      <View style={styles.mainContainer}>
+        <View style={styles.textContainer}>
+          <View>
+            <Text style={textStyles.greetingText}>Good Morning,</Text>
+            <Text style={textStyles.mainText}>Damian Akpan</Text>
+          </View>
 
-        <View style={styles.notificationContainer}>
-          <Image source={BellIcon} style={{
-            width: 24,
-            height: 24,
-          }} />
+          <View style={styles.notificationContainer}>
+            <Image source={BellIcon} style={{
+              width: 24,
+              height: 24,
+            }} />
+          </View>
+        </View>
+        <View style={styles.bannerContainer}>
+          <Text style={textStyles.bannerText}>You have a ride scheduled for 10 mins from now</Text>
         </View>
       </View>
-
     </View>
   );
 };
@@ -46,16 +50,17 @@ const styles = StyleSheet.create({
   container: {
     top: 0,
     left: 0,
-    height: 120,
+    height: 150,
     zIndex: 100,
     width: "100%",
     flexDirection: "row",
     position: "absolute",
     alignItems: "flex-end",
-    // paddingTop: (StatusBar.currentHeight || 30) + 10,
+  },
+  mainContainer: {
+    width: "100%",
   },
   textContainer: {
-    width: "100%",
     paddingBottom: 8,
     flexDirection: "row",
     paddingHorizontal: 20,
@@ -67,6 +72,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 50,
     borderColor: "hsl(0, 0%, 95%)",
+  },
+  bannerContainer: {
+    width: "100%",
+    paddingVertical: 3,
+    paddingHorizontal: 20,
+    backgroundColor: "black",
   }
 });
 
@@ -78,6 +89,11 @@ const textStyles = StyleSheet.create({
   mainText: {
     fontSize: 32,
     fontFamily: "DMSans-SemiBold",
+  },
+  bannerText: {
+    fontSize: 14,
+    color: "white",
+    fontFamily: "DMSans-Regular",
   }
 });
 

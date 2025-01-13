@@ -6,11 +6,14 @@ import { Image } from "expo-image";
 
 import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gorhom/bottom-sheet";
 
+import { Info } from "@/types";
 import { useRide } from "@/context/ride";
+import { useInfo } from "@/context/info";
 import CloseIcon from "@/assets/icons/close.svg";
 
 
 const RideInfo = (): JSX.Element => {
+  const { setInfo } = useInfo();
   const { ride, setCurrentRide } = useRide();
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const snapPoints = React.useMemo(() => ["15%", "30%"], []);
@@ -26,7 +29,8 @@ const RideInfo = (): JSX.Element => {
   const clearRide = () => setCurrentRide(null);
 
   const boardRide = () => {
-    console.log("Boarding ride");
+    clearRide();
+    setInfo({} as Info);
   }
 
   return (
@@ -61,7 +65,7 @@ const RideInfo = (): JSX.Element => {
         </View>
 
         <View style={styles.ctaSection}>
-          <Pressable  onPress={clearRide} style={{ borderRadius: 8, padding: 8, borderWidth: 1, borderColor: "black" }}>
+          <Pressable onPress={clearRide} style={{ borderRadius: 8, padding: 8, borderWidth: 1, borderColor: "black" }}>
             <Image
               source={CloseIcon}
               style={{
@@ -70,8 +74,52 @@ const RideInfo = (): JSX.Element => {
               }}
             />
           </Pressable>
-          <Pressable style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
+          <Pressable
+            onPress={boardRide}
+            style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
             <Text style={textStyles.boardRideText}>Board Ride</Text>
+          </Pressable>
+        </View>
+        <View style={styles.ctaSection}>
+          <Pressable onPress={clearRide} style={{ borderRadius: 8, padding: 8, borderWidth: 1, borderColor: "black" }}>
+            <Image
+              source={CloseIcon}
+              style={{
+                width: 38,
+                height: 38,
+              }}
+            />
+          </Pressable>
+          <Pressable
+            onPress={boardRide}
+            style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
+            <Text style={textStyles.boardRideText}>View Ticket</Text>
+          </Pressable>
+          <Pressable
+            onPress={boardRide}
+            style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
+            <Text style={textStyles.boardRideText}>Cancel Ride</Text>
+          </Pressable>
+        </View>
+        <View style={styles.ctaSection}>
+          <Pressable onPress={clearRide} style={{ borderRadius: 8, padding: 8, borderWidth: 1, borderColor: "black" }}>
+            <Image
+              source={CloseIcon}
+              style={{
+                width: 38,
+                height: 38,
+              }}
+            />
+          </Pressable>
+          <Pressable
+            onPress={boardRide}
+            style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
+            <Text style={textStyles.boardRideText}>Scan QR Code</Text>
+          </Pressable>
+          <Pressable
+            onPress={boardRide}
+            style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
+            <Text style={textStyles.boardRideText}>Cancel Ride</Text>
           </Pressable>
         </View>
       </BottomSheetView>
