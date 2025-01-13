@@ -15,6 +15,8 @@ const Home = (): JSX.Element => {
       <StatusBar style="dark" translucent />
       <AppBar />
       <Text>Home</Text>
+
+      <BottomSheet />
     </View>
   );
 };
@@ -22,7 +24,7 @@ const Home = (): JSX.Element => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "red",
+    backgroundColor: "gray",
   },
 });
 

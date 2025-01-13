@@ -26,7 +26,7 @@ const AppBar = (): JSX.Element => {
       <View style={styles.textContainer}>
         <View>
           <Text style={textStyles.greetingText}>Good Morning,</Text>
-          <Text style={textStyles.mainText}>John Doe</Text>
+          <Text style={textStyles.mainText}>Damian Akpan</Text>
         </View>
 
         <View style={styles.notificationContainer}>
