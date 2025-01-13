@@ -4,8 +4,8 @@ import { View, Text, StyleSheet } from "react-native";
 
 import { StatusBar } from "expo-status-bar";
 
-import AppBar from "./_components/AppBar";
-import BottomSheet from "./_components/BottomSheet";
+import AppBar from "../../../components/AppBar";
+import BottomSheet from "../../../components/BottomSheet";
 
 
 const Home = (): JSX.Element => {
