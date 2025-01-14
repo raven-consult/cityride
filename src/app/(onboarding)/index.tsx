@@ -1,20 +1,24 @@
 import React from "react";
 
-import {Text, View, StyleSheet, Pressable} from "react-native";
+import { Text, View, StyleSheet, Pressable } from "react-native";
 
-import {Image} from "expo-image";
-import {useRouter} from "expo-router";
-import {LinearGradient} from "expo-linear-gradient";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 
 import SplashScreenPng from "@/assets/images/static/splash-screen.png";
-import {signInWithGoogle} from "@/services/auth";
+import { hasPlayServices, signAsAnonymous, signInWithGoogle } from "@/services/auth";
 
 
 const Index = () => {
   const router = useRouter();
 
   const signIn = React.useCallback(async () => {
-    await signInWithGoogle();
+    if (await hasPlayServices()) {
+      await signInWithGoogle();
+    } else {
+      await signAsAnonymous();
+    }
     router.replace("/(app)/home");
   }, [router]);
 
@@ -40,7 +44,7 @@ const Index = () => {
           colors={["rgba(56, 56, 56, 0)", "rgba(0, 0, 0, 1)"]}
         />
         <View style={styles.textContent}>
-          <View style={{gap: 8, alignItems: "center", justifyContent: "center"}}>
+          <View style={{ gap: 8, alignItems: "center", justifyContent: "center" }}>
             <Text style={textStyles.mainText}>
               Find Rides near you across lagos
             </Text>
