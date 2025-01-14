@@ -13,34 +13,12 @@ const Layout = (): JSX.Element => {
         backgroundColor: "white",
       },
       statusBarStyle: "dark",
+      statusBarTranslucent: false,
     }}>
       <Stack.Screen
-        name="index"
+        name="notifications"
         options={{
-          headerShown: false,
-          statusBarTranslucent: true,
-        }}
-      />
-      <Stack.Screen
-        name="fund-wallet"
-        options={{
-          title: "Fund Wallet",
-          header: ({ navigation, route, options }) => {
-            const title = getHeaderTitle(options, route.name)
-            return (
-              <ExtendedAppBar
-                title={title}
-                leadingText="Skip for Now"
-                onPressBack={navigation.goBack}
-              />
-            );
-          }
-        }}
-      />
-      <Stack.Screen
-        name="location"
-        options={{
-          title: "Location Access",
+          title: "Notifications",
           header: ({ navigation, route, options }) => {
             const title = getHeaderTitle(options, route.name)
             return (

@@ -1,14 +1,21 @@
 import React from "react";
 
-import { View, Text, StatusBar, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 
 import BellIcon from "@/assets/icons/bell.svg";
+import { useRouter } from "expo-router";
 
 
 const AppBar = (): JSX.Element => {
+  const router = useRouter();
+
+  const onPressNotification = () => {
+    router.push("/(utils)/notifications");
+  };
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -30,12 +37,12 @@ const AppBar = (): JSX.Element => {
             <Text style={textStyles.mainText}>Damian Akpan</Text>
           </View>
 
-          <View style={styles.notificationContainer}>
+          <Pressable onPress={onPressNotification} style={styles.notificationContainer}>
             <Image source={BellIcon} style={{
               width: 24,
               height: 24,
             }} />
-          </View>
+          </Pressable>
         </View>
         <View style={styles.bannerContainer}>
           <Text style={textStyles.bannerText}>You have a ride scheduled for 10 mins from now</Text>
