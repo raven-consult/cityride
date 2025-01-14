@@ -1,12 +1,12 @@
 import React from "react";
 
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import {View, Text, StyleSheet, Pressable} from "react-native";
 
-import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
+import {Image} from "expo-image";
+import {useRouter} from "expo-router";
+import {LinearGradient} from "expo-linear-gradient";
 
 import BellIcon from "@/assets/icons/bell.svg";
-import { useRouter } from "expo-router";
 
 
 const AppBar = (): JSX.Element => {
@@ -82,6 +82,8 @@ const styles = StyleSheet.create({
   },
   bannerContainer: {
     width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 3,
     paddingHorizontal: 20,
     backgroundColor: "black",
