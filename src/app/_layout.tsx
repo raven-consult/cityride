@@ -1,10 +1,10 @@
 import React from "react";
-import { useFonts } from "expo-font";
-import { Stack } from "expo-router/stack";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import Feather from "@expo/vector-icons/Feather";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import {Stack} from "expo-router/stack";
+import * as SplashScreen from "expo-splash-screen";
+import {GestureHandlerRootView} from "react-native-gesture-handler";
+
+import {GoogleSignin} from "@react-native-google-signin/google-signin";
 
 import RideProvider from "@/context/ride";
 import InfoProvider from "@/context/info";
@@ -13,20 +13,24 @@ import useDMSans from "@/design/fonts/DM_Sans";
 import InfoSheet from "@/components/InfoSheet";
 
 
-// SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync();
 
 
 const RootLayout = (): JSX.Element => {
   const [loaded] = useDMSans();
 
-  // @ts-ignore
-  const [iconsLoaded] = useFonts([Feather.font, Ionicons.font]);
+  React.useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded]);
 
-  // React.useEffect(() => {
-  //   if (loaded && iconsLoaded) {
-  //     SplashScreen.hideAsync();
-  //   }
-  // }, [loaded, iconsLoaded]);
+  React.useEffect(() => {
+    GoogleSignin.configure({
+      offlineAccess: true,
+      webClientId: "605211420713-4h2i0fm6fva1ofli724jlm548bk2esfk.apps.googleusercontent.com",
+    });
+  }, []);
 
   return (
     <GestureHandlerRootView>
