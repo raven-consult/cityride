@@ -1,11 +1,11 @@
 import React from "react";
 
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 
 import { StatusBar } from "expo-status-bar";
 
 import AppBar from "@/components/AppBar";
-
+import MapView from "@/components/MapView";
 import BottomSheet from "@/components/BottomSheet";
 
 
@@ -15,8 +15,7 @@ const Home = (): JSX.Element => {
     <View style={styles.container}>
       <StatusBar style="dark" translucent />
       <AppBar />
-      <Text>Home</Text>
-
+      <MapView />
       <BottomSheet />
     </View>
   );
