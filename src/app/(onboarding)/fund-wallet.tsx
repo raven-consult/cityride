@@ -89,7 +89,6 @@ const FundWallet = (): JSX.Element => {
       <StatusBar backgroundColor="white" translucent={false} />
       <View style={styles.mainContentContainer}>
         <View style={{ gap: 8 }}>
-
           <View style={{ alignItems: "center", flexDirection: "row", gap: 8 }}>
             <Text style={textStyles.nairaText}>₦</Text>
             <TextInput

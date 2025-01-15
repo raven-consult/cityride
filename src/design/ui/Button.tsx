@@ -17,7 +17,7 @@ export const Button = ({ children, onPress }: ButtonProps): JSX.Element => {
 
 export const TextButton = ({ children, onPress }: ButtonProps): JSX.Element => {
   return (
-    <Pressable>
+    <Pressable onPress={onPress}>
       {children}
     </Pressable>
   );
