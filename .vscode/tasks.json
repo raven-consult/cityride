@@ -1,0 +1,60 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Docker Compose",
+      "type": "shell",
+      "command": "docker compose up",
+      "problemMatcher": [],
+      "isBackground": false,
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Start Firebase Emulators",
+      "type": "shell",
+      "command": "adb reverse tcp:9099 tcp:9099 && adb reverse tcp:5001 tcp:5001 && adb reverse tcp:8080 tcp:8080 && adb reverse tcp:9000 tcp:9000 && adb reverse tcp:9199 tcp:9199 && firebase emulators:start --import=./private/emulators_data/ --export-on-exit",
+      "problemMatcher": [],
+      "isBackground": false,
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "Start Expo Server",
+      "type": "shell",
+      "command": "yarn start",
+      "problemMatcher": [],
+      "isBackground": false,
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "Start Ngrok Webhook Server",
+      "type": "shell",
+      "command": "ngrok http 5001",
+      "problemMatcher": [],
+      "isBackground": false,
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "Create Search Schema",
+      "type": "shell",
+      "command": "tsx services/search/createSchemas.ts",
+      "problemMatcher": [],
+      "isBackground": false,
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    }
+  ]
+}
