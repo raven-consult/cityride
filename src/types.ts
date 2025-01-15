@@ -35,3 +35,8 @@ export interface Station {
     longitude: number;
   }
 }
+
+export type SelectedRoute = {
+  end: Station | null;
+  start: Station | null;
+}
