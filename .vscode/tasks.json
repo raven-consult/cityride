@@ -15,7 +15,7 @@
     {
       "label": "Start Firebase Emulators",
       "type": "shell",
-      "command": "firebase emulators:start --import=./private/emulators_data/ --export-on-exit",
+      "command": "adb reverse tcp:9099 tcp:9099 && adb reverse tcp:5001 tcp:5001 && adb reverse tcp:8080 tcp:8080 && adb reverse tcp:9000 tcp:9000 && adb reverse tcp:9199 tcp:9199 && firebase emulators:start --import=./private/emulators_data/ --export-on-exit",
       "problemMatcher": [],
       "isBackground": false,
       "group": {
