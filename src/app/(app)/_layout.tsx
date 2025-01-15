@@ -44,6 +44,7 @@ const Layout = (): JSX.Element => {
         name="home/index"
         options={{
           title: "Home",
+          headerTransparent: true,
           tabBarIcon: ({ focused }) => {
             return focused ? (
               <Image source={HomeActiveIcon} style={{

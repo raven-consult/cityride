@@ -3,7 +3,7 @@ import { utils } from '@react-native-firebase/app';
 import {GoogleSignin} from "@react-native-google-signin/google-signin";
 
 // all good and valid \o/
-export const hasPlayServices = async () => {
+export const hasPlayServices = () => {
   const { isAvailable } = utils().playServicesAvailability;
   return isAvailable;
 }
