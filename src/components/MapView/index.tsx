@@ -1,11 +1,11 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
-import GoogleMapView, { PROVIDER_GOOGLE, Marker as RNMarker, Region, Polyline } from "react-native-maps";
+import GoogleMapView, { PROVIDER_GOOGLE, Marker as RNMarker } from "react-native-maps";
 
 import { Station } from "@/types";
+import { useStation } from "@/context/station";
 import { TextButton } from "@/design/ui/Button";
-
 import { hasPlayServices } from "@/services/auth";
 import { getAllStations } from "@/services/stations";
 
@@ -14,15 +14,28 @@ const MapView = (): JSX.Element => {
   const mapRef = React.useRef<GoogleMapView>(null);
   const [stations, setStations] = React.useState<Station[]>([]);
 
+  const { setCurrentStation } = useStation();
+
   React.useEffect(() => {
     (async () => {
       const stations = await getAllStations();
+      console.log("Stations", stations);
       setStations(stations);
     })();
   }, []);
 
   const onPressStation = (station: Station) => {
-    console.log(station);
+    setCurrentStation(station);
+
+    if(!mapRef.current) return;
+
+    mapRef.current?.animateCamera({
+      center: {
+        latitude: station.coordinates.latitude,
+        longitude: station.coordinates.longitude,
+      },
+      zoom: 16,
+    });
   }
 
   if (!hasPlayServices()) {
@@ -33,6 +46,7 @@ const MapView = (): JSX.Element => {
           gap: 8,
           alignItems: "center",
           justifyContent: "center",
+          backgroundColor: "white",
         }
       ]}>
 
@@ -45,7 +59,7 @@ const MapView = (): JSX.Element => {
             const index = Math.floor(Math.random() * stations.length);
             onPressStation(stations[index]);
           }}>
-          Click on Station
+          <Text>Click on Station</Text>
         </TextButton>
       </View>
     );
@@ -78,7 +92,6 @@ const MapView = (): JSX.Element => {
             }}
           />
         ))}
-
       </GoogleMapView>
     );
   }

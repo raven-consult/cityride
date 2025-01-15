@@ -8,8 +8,9 @@ import * as Location from "expo-location";
 import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gorhom/bottom-sheet";
 
 import { useDebounce } from "@/utils";
-import { Ride, Station } from "@/types";
+import { Ride } from "@/types";
 import { useRide } from "@/context/ride";
+import { useStation } from "@/context/station";
 import { getNearestStation } from "@/services/stations";
 import { getRidesStartingAtStation } from "@/services/rides";
 
@@ -23,12 +24,12 @@ const BottomSheet = (): JSX.Element => {
   const { ride, setCurrentRide } = useRide();
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const snapPoints = React.useMemo(() => ["15%", "30%"], []);
+  const { currentStation, setCurrentStation } = useStation();
 
   const [query, setQuery] = React.useState<string>("");
   const [searchResults, setSearchResults] = React.useState<Ride[]>([]);
 
   const [rides, setRides] = React.useState<Ride[]>(Array.from({ length: 8 }));
-  const [currentStation, setCurrentStation] = React.useState<Station | null>(null);
 
   const debouncedQuery = useDebounce<string>(query, 100);
 
@@ -59,6 +60,8 @@ const BottomSheet = (): JSX.Element => {
 
   React.useEffect(() => {
     (async () => {
+      if(currentStation) return;
+
       const currentLocation = await Location.getCurrentPositionAsync();
       if (!currentLocation) return;
 
