@@ -6,15 +6,28 @@ import {Image} from "expo-image";
 import {useRouter} from "expo-router";
 import {LinearGradient} from "expo-linear-gradient";
 
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+
 import BellIcon from "@/assets/icons/bell.svg";
 
 
 const AppBar = (): JSX.Element => {
   const router = useRouter();
+  const [currentUser, setCurrentUser] = React.useState<FirebaseAuthTypes.User | null>(null);
 
   const onPressNotification = () => {
     router.push("/(utils)/notifications");
   };
+
+  React.useEffect(() => {
+    const subscriber = auth()
+      .onAuthStateChanged((user: FirebaseAuthTypes.User | null) => {
+        if (user) {
+          setCurrentUser(user);
+        }
+      });
+    return () => subscriber();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -34,7 +47,7 @@ const AppBar = (): JSX.Element => {
         <View style={styles.textContainer}>
           <View>
             <Text style={textStyles.greetingText}>Good Morning,</Text>
-            <Text style={textStyles.mainText}>Damian Akpan</Text>
+            <Text style={textStyles.mainText}>{currentUser?.displayName}</Text>
           </View>
 
           <Pressable onPress={onPressNotification} style={styles.notificationContainer}>
