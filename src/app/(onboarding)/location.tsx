@@ -1,28 +1,34 @@
 import React from "react";
 
-import { View, Text, StyleSheet, Pressable, TextInput, Keyboard } from "react-native";
+import { View, Text, StyleSheet, Pressable, Alert } from "react-native";
 
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import * as Location from "expo-location";
 import { StatusBar } from "expo-status-bar";
 
 import LocationImg from "@/assets/images/static/location.svg";
 
 
-const Location = (): JSX.Element => {
-  const [isFocused, setIsFocused] = React.useState<boolean>(false);
+const RequestLocation = (): JSX.Element => {
+  const router = useRouter();
 
-  React.useEffect(() => {
-    const showSub = Keyboard.addListener("keyboardDidShow", (event) => {
-      setIsFocused(true);
-    });
+  const requestPermission = React.useCallback(async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
 
-    const hideSub = Keyboard.addListener("keyboardDidHide", (event) => {
-      setIsFocused(false);
-    });
-
-    return () => {
-      showSub.remove();
-      hideSub.remove();
+    if( status === Location.PermissionStatus.GRANTED) {
+      router.push("/(onboarding)/fund-wallet");
+    } else if (status !== Location.PermissionStatus.DENIED) {
+      Alert.alert(
+        "Location Permission",
+        "Please grant location permission to continue",
+        [
+          {
+            text: "OK",
+            onPress: () => requestPermission(),
+          }
+        ]
+      );
     }
   }, []);
 
@@ -47,13 +53,15 @@ const Location = (): JSX.Element => {
           </Text>
         </View>
       </View>
-      <Pressable style={{
-        padding: 16,
-        borderRadius: 8,
-        alignItems: "center",
-        backgroundColor: "black",
-        justifyContent: "center",
-      }}>
+      <Pressable
+        onPress={requestPermission}
+        style={{
+          padding: 16,
+          borderRadius: 8,
+          alignItems: "center",
+          backgroundColor: "black",
+          justifyContent: "center",
+        }}>
         <Text style={textStyles.ctaText}>Grant Permission</Text>
       </Pressable>
     </View>
@@ -61,7 +69,7 @@ const Location = (): JSX.Element => {
 };
 
 
-export default Location;
+export default RequestLocation;
 
 const textStyles = StyleSheet.create({
   nairaText: {
@@ -89,6 +97,7 @@ const styles = StyleSheet.create({
     gap: 8,
     flex: 1,
     paddingTop: 48,
+    paddingBottom: 20,
     paddingHorizontal: 16,
     justifyContent: "space-between",
   },

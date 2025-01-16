@@ -7,13 +7,19 @@ import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 
 import SplashScreenPng from "@/assets/images/static/splash-screen.png";
+import { hasPlayServices, signAsAnonymous, signInWithGoogle } from "@/services/auth";
 
 
 const Index = () => {
   const router = useRouter();
 
   const signIn = React.useCallback(async () => {
-    router.replace("/(app)/home");
+    if (await hasPlayServices()) {
+      await signInWithGoogle();
+    } else {
+      await signAsAnonymous();
+    }
+    router.replace("/(onboarding)/location");
   }, [router]);
 
   return (

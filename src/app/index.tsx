@@ -1,22 +1,33 @@
 import React from "react";
 
-import { Image } from "expo-image";
-import { useRouter } from "expo-router";
+import {View, StyleSheet} from "react-native";
+
+import {Image} from "expo-image";
+import {useRouter} from "expo-router";
+
+import auth, {FirebaseAuthTypes} from "@react-native-firebase/auth";
 
 import BrandIcon from "@/assets/images/branding/logo.png";
-
-import { StatusBar } from "expo-status-bar";
-import { View, StyleSheet } from "react-native";
 
 
 const Home = (): JSX.Element => {
   const router = useRouter();
 
   React.useEffect(() => {
-    setTimeout(() => {
-      router.replace("/(onboarding)");
-      // router.replace("/(app)/home");
-    }, 2000);
+    const subscriber = auth()
+      .onAuthStateChanged((user: FirebaseAuthTypes.User | null) => {
+        if (user) {
+          setTimeout(() => {
+            router.replace("/(app)/home");
+          }, 500);
+
+        } else {
+          setTimeout(() => {
+            router.replace("/(onboarding)");
+          }, 500);
+        }
+      });
+    return () => subscriber();
   }, []);
 
   return (
