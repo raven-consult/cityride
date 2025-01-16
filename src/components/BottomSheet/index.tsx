@@ -7,10 +7,12 @@ import * as Location from "expo-location";
 
 import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gorhom/bottom-sheet";
 
-import { useDebounce } from "@/utils";
 import { Ride } from "@/types";
+import { useDebounce } from "@/utils";
 import { useRide } from "@/context/ride";
+import { useInfo } from "@/context/info";
 import { useStation } from "@/context/station";
+import { useCreateRide } from "@/context/createRide";
 import { getNearestStation } from "@/services/stations";
 import { getRidesStartingAtStation } from "@/services/rides";
 
@@ -24,7 +26,10 @@ const BottomSheet = (): JSX.Element => {
   const { ride, setCurrentRide } = useRide();
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const snapPoints = React.useMemo(() => ["15%", "30%"], []);
+
+  const { info } = useInfo();
   const { currentStation, setCurrentStation } = useStation();
+  const { createRideMode, setCreateRideMode } = useCreateRide();
 
   const [query, setQuery] = React.useState<string>("");
   const [searchResults, setSearchResults] = React.useState<Ride[]>([]);
@@ -34,17 +39,17 @@ const BottomSheet = (): JSX.Element => {
   const debouncedQuery = useDebounce<string>(query, 100);
 
   React.useEffect(() => {
-    if (ride) {
+    if (ride || createRideMode || info) {
       bottomSheetRef.current?.close();
     } else {
       bottomSheetRef.current?.snapToIndex(0);
     }
-  }, [ride]);
+  }, [ride, createRideMode, info]);
 
   React.useEffect(() => {
     (async () => {
       if (currentStation) {
-        const rides = await getRidesStartingAtStation(currentStation.id)
+        const rides = await getRidesStartingAtStation(currentStation.id);
         setRides(rides);
       }
     })();
@@ -60,9 +65,10 @@ const BottomSheet = (): JSX.Element => {
 
   React.useEffect(() => {
     (async () => {
-      if(currentStation) return;
+      if (currentStation) return;
 
       const currentLocation = await Location.getCurrentPositionAsync();
+
       if (!currentLocation) return;
 
       const station = await getNearestStation({
@@ -76,6 +82,14 @@ const BottomSheet = (): JSX.Element => {
 
   const onPressItem = (ride: Ride) => {
     setCurrentRide(ride);
+  }
+
+  const onPressCreateRide = () => {
+    setCreateRideMode(true);
+  }
+
+  const onPressFindRide = () => {
+    bottomSheetRef.current?.snapToPosition("50%");
   }
 
   return (
@@ -115,7 +129,7 @@ const BottomSheet = (): JSX.Element => {
         </View>
 
         <View style={styles.driverActionsContainer}>
-          <Pressable style={styles.driverActionsItem}>
+          <Pressable onPress={onPressCreateRide} style={styles.driverActionsItem}>
             <View style={{ paddingHorizontal: 8 }}>
               <Text style={textStyles.driverActionSubtitle}>Create a</Text>
               <Text style={textStyles.driverActionTitle}>Ride</Text>
@@ -128,7 +142,7 @@ const BottomSheet = (): JSX.Element => {
               }}
             />
           </Pressable>
-          <Pressable style={styles.driverActionsItem}>
+          <Pressable onPress={onPressFindRide} style={styles.driverActionsItem}>
             <View style={{ paddingHorizontal: 8 }}>
               <Text style={textStyles.driverActionSubtitle}>Find a</Text>
               <Text style={textStyles.driverActionTitle}>Ride</Text>
