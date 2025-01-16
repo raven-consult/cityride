@@ -77,6 +77,7 @@ export const createRide = onRequest(async (req, res) => {
     maxPassengers: driverInfo.driver.maxPassengers,
   };
 
+  // TODO: Use the driver's coordinates and the start station coordinates
   // const routeData = await getGMapsRoutes(startStationData.coordinates, endStationData.coordinates);
   ride.metadata = {
     ...ride.metadata,

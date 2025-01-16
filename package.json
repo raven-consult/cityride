@@ -19,8 +19,13 @@
     "doctor": {
       "reactNativeDirectoryCheck": {
         "exclude": [
+          "yup",
+          "date-fns",
+          "geofire-common",
           "react-native-maps",
-          "react-native-vision-camera"
+          "react-native-vision-camera",
+          "react-native-paystack-webview",
+          "react-native-element-dropdown"
         ]
       }
     }
