@@ -1,18 +1,22 @@
 import React from "react";
 
-import {View, Text, StyleSheet, Pressable} from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 
-import {Image} from "expo-image";
-import {useRouter} from "expo-router";
-import {LinearGradient} from "expo-linear-gradient";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+
+import { useRide } from "@/context/ride";
 
 import BellIcon from "@/assets/icons/bell.svg";
 
 
 const AppBar = (): JSX.Element => {
   const router = useRouter();
+  const { pendingRide } = useRide();
+
   const [currentUser, setCurrentUser] = React.useState<FirebaseAuthTypes.User | null>(null);
 
   const onPressNotification = () => {
@@ -57,9 +61,11 @@ const AppBar = (): JSX.Element => {
             }} />
           </Pressable>
         </View>
-        <View style={styles.bannerContainer}>
-          <Text style={textStyles.bannerText}>You have a ride scheduled for 10 mins from now</Text>
-        </View>
+        {pendingRide && (
+          <View style={styles.bannerContainer}>
+            <Text style={textStyles.bannerText}>You have a ride scheduled for 10 mins from now</Text>
+          </View>
+        )}
       </View>
     </View>
   );
