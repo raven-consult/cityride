@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, StyleProp, ViewStyle } from "react-native";
 
+import { Dropdown } from "react-native-element-dropdown";
 import GoogleMapView, { PROVIDER_GOOGLE, Marker as RNMarker } from "react-native-maps";
 
 import { Station } from "@/types";
@@ -8,13 +9,23 @@ import { useStation } from "@/context/station";
 import { TextButton } from "@/design/ui/Button";
 import { hasPlayServices } from "@/services/auth";
 import { getAllStations } from "@/services/stations";
+import { useCreateRide } from "@/context/createRide";
 
 
 const MapView = (): JSX.Element => {
   const mapRef = React.useRef<GoogleMapView>(null);
   const [stations, setStations] = React.useState<Station[]>([]);
 
+  const { createRideMode, selectedRoute, setSelectedRoute } = useCreateRide();
+
   const { setCurrentStation } = useStation();
+
+  const formatStations = React.useMemo(() => {
+    return stations.map(station => ({
+      label: station.name,
+      value: station.id,
+    }));
+  }, [stations]);
 
   React.useEffect(() => {
     (async () => {
@@ -52,6 +63,49 @@ const MapView = (): JSX.Element => {
         <Text>
           Google Play Services are not available
         </Text>
+
+        {createRideMode && (
+          <View style={{
+            gap: 16,
+            width: "100%",
+            alignItems: "center",
+            flexDirection: "row",
+            paddingHorizontal: 12,
+          }}>
+            <Select
+              placeholder="Start Position"
+              data={formatStations}
+              value={"Lagos"}
+              style={{
+                flex: 1,
+              }}
+              onChange={(val) => {
+                const station = stations.filter(station => station.id === val.value)[0];
+                setSelectedRoute({
+                  ...selectedRoute,
+                  start: station,
+                });
+              }}
+            />
+            <Text>To</Text>
+            <Select
+              placeholder="End Position"
+              data={formatStations}
+              value={"Lagos"}
+              style={{
+                flex: 1,
+              }}
+              onChange={(val) => {
+                const station = stations.filter(station => station.id === val.value)[0];
+
+                setSelectedRoute({
+                  ...selectedRoute,
+                  end: station,
+                });
+              }}
+            />
+          </View>
+        )}
 
         <TextButton
           onPress={() => {
@@ -102,9 +156,74 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     height: "100%",
-  }
+  },
+  dropdown: {
+    height: 50,
+    borderRadius: 8,
+    borderWidth: 0.5,
+    paddingHorizontal: 8,
+    borderColor: "hsl(0, 0%, 85%)",
+  },
+  inputSearchStyle: {
+    height: 40,
+    width: 100,
+    fontSize: 16,
+  },
+  selectedTextStyle: {
+    width: 100,
+    paddingLeft: 4,
+  },
 });
 
 
 
 export default MapView;
+
+
+
+interface SelectData {
+  label: string;
+  value: string;
+}
+
+interface SelectProps {
+  value: string;
+  error?: boolean;
+  disabled?: boolean;
+  placeholder: string;
+  data: Array<SelectData>;
+
+  style?: StyleProp<ViewStyle>;
+  onChange?: (value: SelectData) => void;
+}
+
+const Select = ({ disabled = false, placeholder, error = false, value, data, style, onChange }: SelectProps): JSX.Element => {
+  const [isFocus, setIsFocus] = React.useState(false);
+
+  return (
+    <Dropdown
+      data={data}
+      value={value}
+      disable={disabled}
+      maxHeight={300}
+      labelField="label"
+      valueField="value"
+      onChange={item => {
+        onChange ? onChange(item) : null;
+        setIsFocus(false);
+      }}
+      onFocus={() => setIsFocus(true)}
+      onBlur={() => setIsFocus(false)}
+      style={[
+        style,
+        styles.dropdown,
+        error && { borderColor: "red" },
+      ]}
+      itemTextStyle={[]}
+      placeholder={!isFocus ? placeholder : "..."}
+      placeholderStyle={[{ color: "blue", width: 100 }]}
+      inputSearchStyle={[styles.inputSearchStyle]}
+      selectedTextStyle={[styles.selectedTextStyle]}
+    />
+  );
+}

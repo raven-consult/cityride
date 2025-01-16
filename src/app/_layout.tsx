@@ -19,6 +19,7 @@ import useDMSans from "@/design/fonts/DM_Sans";
 import InfoSheet from "@/components/InfoSheet";
 import StationProvider from "@/context/station";
 import CreateRide from "@/components/CreateRide";
+import CreateRideProvider from "@/context/createRide";
 
 
 SplashScreen.preventAutoHideAsync();
@@ -70,19 +71,21 @@ const RootLayout = (): JSX.Element => {
     <GestureHandlerRootView>
       <RideProvider>
         <StationProvider>
-          <InfoProvider>
-            <Stack screenOptions={{
-              animation: "fade",
-              headerShown: false,
-              contentStyle: { backgroundColor: "white" },
-            }}>
-              <Stack.Screen name="(app)" />
-              <Stack.Screen name="(onboarding)" />
-            </Stack>
-            <RideInfo />
-            <InfoSheet />
-            <CreateRide />
-          </InfoProvider>
+          <CreateRideProvider>
+            <InfoProvider>
+              <Stack screenOptions={{
+                animation: "fade",
+                headerShown: false,
+                contentStyle: { backgroundColor: "white" },
+              }}>
+                <Stack.Screen name="(app)" />
+                <Stack.Screen name="(onboarding)" />
+              </Stack>
+              <RideInfo />
+              <InfoSheet />
+              <CreateRide />
+            </InfoProvider>
+          </CreateRideProvider>
         </StationProvider>
       </RideProvider>
     </GestureHandlerRootView>
