@@ -4,9 +4,23 @@ import {GoogleSignin} from "@react-native-google-signin/google-signin";
 
 
 // all good and valid \o/
-export const hasPlayServices = async () => {
+export const hasPlayServices = () => {
   const { isAvailable } = utils().playServicesAvailability;
   return isAvailable;
+}
+
+
+export async function signInAsFakeUser () {
+  const email = "fakeUser@gmail.com";
+  const password = "fakePassword";
+
+  try {
+    const userCredential = await auth().signInWithEmailAndPassword(email, password);
+    return userCredential;
+  } catch (error) {
+    console.error("Error during fake user sign-in:", error);
+    throw error;
+  }
 }
 
 

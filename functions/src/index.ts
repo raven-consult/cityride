@@ -1,19 +1,12 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+import * as admin from "firebase-admin";
 
-import {onRequest} from "firebase-functions/v2/https";
-import * as logger from "firebase-functions/logger";
+admin.initializeApp({
+  databaseURL: "https://cityride-dev-default-rtdb.firebaseio.com"
+});
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
-
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+export * as map from "./services/map";
+export * as auth from "./services/auth";
+// export * as wallet from "./services/wallet";
+// export * as search from "./services/search";
+export * as rideShare from "./services/rides";
+export * as stations from "./services/stations";

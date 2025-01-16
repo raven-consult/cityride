@@ -3,11 +3,16 @@ import React from "react";
 import { View, Text, TextInput, StyleSheet, Pressable } from "react-native";
 
 import { Image } from "expo-image";
+import * as Location from "expo-location";
 
 import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gorhom/bottom-sheet";
 
+import { useDebounce } from "@/utils";
 import { Ride } from "@/types";
 import { useRide } from "@/context/ride";
+import { useStation } from "@/context/station";
+import { getNearestStation } from "@/services/stations";
+import { getRidesStartingAtStation } from "@/services/rides";
 
 import FlagIcon from "@/assets/icons/flag.svg";
 import SearchIcon from "@/assets/icons/search.svg";
@@ -19,8 +24,14 @@ const BottomSheet = (): JSX.Element => {
   const { ride, setCurrentRide } = useRide();
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const snapPoints = React.useMemo(() => ["15%", "30%"], []);
+  const { currentStation, setCurrentStation } = useStation();
 
-  const [currentLocation, setCurrentLocation] = React.useState<string | null>(null);
+  const [query, setQuery] = React.useState<string>("");
+  const [searchResults, setSearchResults] = React.useState<Ride[]>([]);
+
+  const [rides, setRides] = React.useState<Ride[]>(Array.from({ length: 8 }));
+
+  const debouncedQuery = useDebounce<string>(query, 100);
 
   React.useEffect(() => {
     if (ride) {
@@ -31,13 +42,40 @@ const BottomSheet = (): JSX.Element => {
   }, [ride]);
 
   React.useEffect(() => {
-    setTimeout(() => {
-      setCurrentLocation("Unilag Bus Stop");
-    }, 3000);
+    (async () => {
+      if (currentStation) {
+        const rides = await getRidesStartingAtStation(currentStation.id)
+        setRides(rides);
+      }
+    })();
   }, []);
 
-  const onPressItem = () => {
-    setCurrentRide({} as Ride);
+  React.useEffect(() => {
+    (async () => {
+      setSearchResults([]);
+      // const collections = await getStationsResults(debouncedQuery);
+      // setResults(collections);
+    })();
+  }, [debouncedQuery]);
+
+  React.useEffect(() => {
+    (async () => {
+      if(currentStation) return;
+
+      const currentLocation = await Location.getCurrentPositionAsync();
+      if (!currentLocation) return;
+
+      const station = await getNearestStation({
+        latitude: currentLocation.coords.latitude,
+        longitude: currentLocation.coords.longitude,
+      });
+
+      setCurrentStation(station);
+    })();
+  }, []);
+
+  const onPressItem = (ride: Ride) => {
+    setCurrentRide(ride);
   }
 
   return (
@@ -51,9 +89,9 @@ const BottomSheet = (): JSX.Element => {
       backgroundComponent={props => <BottomSheetBackground {...props} />}
     >
       <BottomSheetView style={styles.container}>
-        <View style={styles.currentLocation}>
-          {currentLocation ? (
-            <Text style={textStyles.currentLocationText}>Unilag Bus Stop</Text>
+        <View style={styles.currentStation}>
+          {currentStation ? (
+            <Text style={textStyles.currentStationText}>{currentStation.name}</Text>
           ) : (
             <Text style={textStyles.loadingLocation}>Locating Nearest Bus Stop...</Text>
           )}
@@ -68,6 +106,8 @@ const BottomSheet = (): JSX.Element => {
               />
             </View>
             <TextInput
+              value={query}
+              onChangeText={setQuery}
               placeholder="Search for Location"
               style={textStyles.searchContainer}
             />
@@ -105,10 +145,19 @@ const BottomSheet = (): JSX.Element => {
 
         <View style={{ gap: 10, paddingHorizontal: 16 }}>
           <Text style={textStyles.nearbyRidesText}>Nearby Rides</Text>
-          {Array.from({ length: 8 }).map((_, index) => (
+          {searchResults.map((ride, index) => (
             <RideItem
               key={index}
-              onPress={onPressItem}
+              ride={ride}
+              onPress={() => onPressItem(ride)}
+            />
+          ))}
+
+          {!searchResults && rides.map((ride, index) => (
+            <RideItem
+              key={index}
+              ride={ride}
+              onPress={() => onPressItem(ride)}
             />
           ))}
         </View>
@@ -129,13 +178,11 @@ export default BottomSheet;
 
 
 interface RideItemProps {
-  price?: string;
-  rideId?: string;
-  destination?: string;
+  ride: Ride;
   onPress?: () => void;
 }
 
-const RideItem = ({ price, rideId, destination, onPress }: RideItemProps): JSX.Element => {
+const RideItem = ({ ride, onPress }: RideItemProps): JSX.Element => {
   return (
     <Pressable onPress={onPress} style={{ minHeight: 60, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
       <View style={{ padding: 12 }}>
@@ -189,7 +236,7 @@ const textStyles = StyleSheet.create({
     height: "100%",
     fontFamily: "DMSans-Regular",
   },
-  currentLocationText: {
+  currentStationText: {
     fontSize: 14,
     fontFamily: "DMSans-SemiBold",
   },
@@ -207,7 +254,7 @@ const styles = StyleSheet.create({
   container: {
     gap: 6,
   },
-  currentLocation: {
+  currentStation: {
     paddingVertical: 8,
     borderTopWidth: 1,
     borderBottomWidth: 1,

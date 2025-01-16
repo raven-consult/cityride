@@ -3,18 +3,35 @@ import React from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+
+import { useRide } from "@/context/ride";
+
 import BellIcon from "@/assets/icons/bell.svg";
-import { useRouter } from "expo-router";
 
 
 const AppBar = (): JSX.Element => {
   const router = useRouter();
+  const { pendingRide } = useRide();
+
+  const [currentUser, setCurrentUser] = React.useState<FirebaseAuthTypes.User | null>(null);
 
   const onPressNotification = () => {
     router.push("/(utils)/notifications");
   };
+
+  React.useEffect(() => {
+    const subscriber = auth()
+      .onAuthStateChanged((user: FirebaseAuthTypes.User | null) => {
+        if (user) {
+          setCurrentUser(user);
+        }
+      });
+    return () => subscriber();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -34,7 +51,7 @@ const AppBar = (): JSX.Element => {
         <View style={styles.textContainer}>
           <View>
             <Text style={textStyles.greetingText}>Good Morning,</Text>
-            <Text style={textStyles.mainText}>Damian Akpan</Text>
+            <Text style={textStyles.mainText}>{currentUser?.displayName}</Text>
           </View>
 
           <Pressable onPress={onPressNotification} style={styles.notificationContainer}>
@@ -44,9 +61,11 @@ const AppBar = (): JSX.Element => {
             }} />
           </Pressable>
         </View>
-        <View style={styles.bannerContainer}>
-          <Text style={textStyles.bannerText}>You have a ride scheduled for 10 mins from now</Text>
-        </View>
+        {pendingRide && (
+          <View style={styles.bannerContainer}>
+            <Text style={textStyles.bannerText}>You have a ride scheduled for 10 mins from now</Text>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -82,6 +101,8 @@ const styles = StyleSheet.create({
   },
   bannerContainer: {
     width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 3,
     paddingHorizontal: 20,
     backgroundColor: "black",
