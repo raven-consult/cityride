@@ -1,6 +1,24 @@
 import auth from "@react-native-firebase/auth";
+import { utils } from "@react-native-firebase/app";
 import {GoogleSignin} from "@react-native-google-signin/google-signin";
 
+
+// all good and valid \o/
+export const hasPlayServices = async () => {
+  const { isAvailable } = utils().playServicesAvailability;
+  return isAvailable;
+}
+
+
+export async function signAsAnonymous() {
+  try {
+    const userCredential = await auth().signInAnonymously();
+    return userCredential;
+  } catch (error) {
+    console.error("Error during anonymous sign-in:", error);
+    throw error;
+  }
+}
 
 export async function signInWithGoogle() {
   try {

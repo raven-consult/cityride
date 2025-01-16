@@ -19,7 +19,7 @@ const Index = () => {
     } else {
       await signAsAnonymous();
     }
-    router.replace("/(app)/home");
+    router.replace("/(onboarding)/location");
   }, [router]);
 
   return (
