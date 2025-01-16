@@ -1,19 +1,19 @@
 import React from "react";
-
-import "react-native-reanimated";
-
-import { Stack } from "expo-router";
 import { useFonts } from "expo-font";
-import * as SplashScreen from "expo-splash-screen";
+import { Stack } from "expo-router/stack";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
-import useDMSans from "@/design-system/fonts/DM_Sans";
+import RideProvider from "@/context/ride";
+import InfoProvider from "@/context/info";
+import RideInfo from "@/components/RideInfo";
+import useDMSans from "@/design/fonts/DM_Sans";
+import InfoSheet from "@/components/InfoSheet";
 
 
-SplashScreen.preventAutoHideAsync();
+// SplashScreen.preventAutoHideAsync();
 
 
 const RootLayout = (): JSX.Element => {
@@ -22,24 +22,32 @@ const RootLayout = (): JSX.Element => {
   // @ts-ignore
   const [iconsLoaded] = useFonts([Feather.font, Ionicons.font]);
 
-  React.useEffect(() => {
-    if (loaded && iconsLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded, iconsLoaded]);
+  // React.useEffect(() => {
+  //   if (loaded && iconsLoaded) {
+  //     SplashScreen.hideAsync();
+  //   }
+  // }, [loaded, iconsLoaded]);
 
   return (
     <GestureHandlerRootView>
-      <Stack screenOptions={{
-        contentStyle: {
-          backgroundColor: "white",
-        },
-        animation: "fade",
-        headerShown: false,
-        statusBarHidden: false,
-        navigationBarHidden: false,
-        statusBarTranslucent: true,
-      }} />
+      <RideProvider>
+        <InfoProvider>
+          <Stack screenOptions={{
+            contentStyle: {
+              backgroundColor: "white",
+            },
+            animation: "fade",
+            headerShown: false,
+            statusBarStyle: "dark",
+          }}>
+            <Stack.Screen name="(app)" />
+            <Stack.Screen name="(onboarding)" />
+          </Stack>
+
+          <RideInfo />
+          <InfoSheet />
+        </InfoProvider>
+      </RideProvider>
     </GestureHandlerRootView>
   );
 };
