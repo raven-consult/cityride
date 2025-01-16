@@ -24,8 +24,6 @@ export interface CreateRideRequest {
   driver: string;
   endStation: string;
   startStation: string;
-  numPassengers: number;
-  metadata: RideMetadata;
 }
 
 // TODO: Add comments
@@ -34,7 +32,7 @@ export const createRide = onRequest(async (req, res) => {
 
   // TODO: Check if user is an authorized driver
 
-  const { driver, startStation, endStation, metadata, price } = (req.body as CreateRideRequest);
+  const { driver, startStation, endStation, price } = (req.body as CreateRideRequest);
 
   // Check if driver is driver
   const driverData = await database.collection("users").doc(driver).get();
@@ -46,7 +44,7 @@ export const createRide = onRequest(async (req, res) => {
   const driverInfo = driverData.data() as RiderUserData;
 
   // Check if start is bus stops
-  const startStationDoc = await database.collection("station").doc(startStation).get();
+  const startStationDoc = await database.collection("stations").doc(startStation).get();
   if (!startStationDoc.exists) {
     logger.error("A User tried to create with ride with invalid start point", driver);
     res.status(400).send("Start point does not exist");
@@ -55,7 +53,7 @@ export const createRide = onRequest(async (req, res) => {
   const startStationData = {...startStationDoc.data(), id: startStationDoc.id} as Station;
 
   // Check if end is bus stops
-  const endStationDoc = await database.collection("station").doc(endStation).get();
+  const endStationDoc = await database.collection("stations").doc(endStation).get();
   if (!endStationDoc.exists) {
     res.status(400).send("End point does not exist");
     logger.error("A User tried to create with ride with invalid destination point", driver);
@@ -74,28 +72,30 @@ export const createRide = onRequest(async (req, res) => {
       id: driver,
       carNumber: driverInfo.driver.carNumber,
     },
-    metadata,
     passengers: {},
+    metadata: {} as RideMetadata,
     maxPassengers: driverInfo.driver.maxPassengers,
   };
 
-  const routeData = await getGMapsRoutes(startStationData.coordinates, endStationData.coordinates);
+  // const routeData = await getGMapsRoutes(startStationData.coordinates, endStationData.coordinates);
   ride.metadata = {
     ...ride.metadata,
-    driverArrivalMins: routeData.trafficData.timeMins,
+    driverArrivalMins: 5,
   }
 
   await database.collection("rides").doc(rideId).set(ride);
 
   const driverRideInfo: DriverRideInfo = {
     id: rideId,
-    start: startStationData,
-    end: endStationData,
-    driver: {
-      id: driver,
+    price: ride.price,
+    itenary: {
+      end: endStationData,
+      start: startStationData,
     },
-    metadata,
+    driver: { id: driver },
+    metadata: ride.metadata,
   }
+
   res.status(200).send(driverRideInfo);
 });
 
@@ -367,7 +367,7 @@ export const sendArrivalNotification = onRequest(async (req, res) => {
 
 const generateCode = () => Math.random().toString(36).substring(2, 6);
 
-
+// @ts-ignore
 const getGMapsRoutes = async (station: Coordinate, user: Coordinate): Promise<MapResponse> => {
   const url = "https://routes.googleapis.com/directions/v2:computeRoutes";
 
@@ -526,14 +526,16 @@ interface PassengerRideInfo {
   metadata: RideMetadata;
 }
 
-interface DriverRideInfo {
+export interface DriverRideInfo {
   id: string;
-  start: Station;
-  end: Station;
+  price: number;
+  itenary: {
+    end: Station;
+    start: Station;
+  };
   driver: { id: string };
   metadata: RideMetadata;
 }
-
 
 type GeojsonLineString = [number, number];
 
