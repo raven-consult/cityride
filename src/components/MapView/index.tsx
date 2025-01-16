@@ -19,7 +19,6 @@ const MapView = (): JSX.Element => {
   React.useEffect(() => {
     (async () => {
       const stations = await getAllStations();
-      console.log("Stations", stations);
       setStations(stations);
     })();
   }, []);
@@ -27,12 +26,12 @@ const MapView = (): JSX.Element => {
   const onPressStation = (station: Station) => {
     setCurrentStation(station);
 
-    if(!mapRef.current) return;
+    if (!mapRef.current) return;
 
     mapRef.current?.animateCamera({
       center: {
         latitude: station.coordinates.latitude,
-        longitude: station.coordinates.longitude,
+        longitude: station.coordinates.longitude
       },
       zoom: 16,
     });
@@ -88,7 +87,7 @@ const MapView = (): JSX.Element => {
             onPress={() => onPressStation(station)}
             coordinate={{
               latitude: station.coordinates.latitude,
-              longitude: station.coordinates.longitude,
+              longitude: station.coordinates.longitude
             }}
           />
         ))}
