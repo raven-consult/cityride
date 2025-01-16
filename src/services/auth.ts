@@ -10,6 +10,20 @@ export const hasPlayServices = () => {
 }
 
 
+export async function signInAsFakeUser () {
+  const email = "fakeUser@gmail.com";
+  const password = "fakePassword";
+
+  try {
+    const userCredential = await auth().signInWithEmailAndPassword(email, password);
+    return userCredential;
+  } catch (error) {
+    console.error("Error during fake user sign-in:", error);
+    throw error;
+  }
+}
+
+
 export async function signAsAnonymous() {
   try {
     const userCredential = await auth().signInAnonymously();

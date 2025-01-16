@@ -7,7 +7,7 @@ import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 
 import SplashScreenPng from "@/assets/images/static/splash-screen.png";
-import { hasPlayServices, signAsAnonymous, signInWithGoogle } from "@/services/auth";
+import { hasPlayServices, signInAsFakeUser, signInWithGoogle } from "@/services/auth";
 
 
 const Index = () => {
@@ -17,7 +17,7 @@ const Index = () => {
     if (await hasPlayServices()) {
       await signInWithGoogle();
     } else {
-      await signAsAnonymous();
+      await signInAsFakeUser();
     }
     router.replace("/(onboarding)/location");
   }, [router]);

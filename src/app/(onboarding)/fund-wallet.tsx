@@ -6,28 +6,53 @@ import * as Burnt from "burnt";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import auth from "@react-native-firebase/auth";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { Paystack, paystackProps } from "react-native-paystack-webview";
 
 import EditIcon from "@/assets/icons/edit.svg";
 import { initializeTransaction } from "@/services/payment";
 
 
-const PAYSTACK_PUBLIC_KEY = process.env.EXPO_PUBLIC_PAYSTACK_PUBLIC_KEY || "";
+const PAYSTACK_PUBLIC_KEY = process.env.EXPO_PUBLIC_PAYSTACK_PUBLIC_KEY || "pk_test_a358a1557fcbee2eb47a7b53ea4f6a62d6ffe34c";
 
 
 const FundWallet = (): JSX.Element => {
+  const [amount, setAmount] = React.useState<string>("");
   const [isFocused, setIsFocused] = React.useState<boolean>(false);
+  const [currentUser, setCurrentUser] = React.useState<FirebaseAuthTypes.User | null>(null);
 
   const router = useRouter();
-  const currentUser = auth().currentUser;
   const paystackRef = React.useRef<paystackProps.PayStackRef>(null);
+
+  React.useEffect(() => {
+    const subscriber = auth()
+      .onAuthStateChanged((user: FirebaseAuthTypes.User | null) => {
+        if (user) {
+          console.log(user);
+          setCurrentUser(user);
+        }
+      });
+    return () => subscriber();
+  }, []);
+
+  React.useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", (event) => {
+      setIsFocused(true);
+    });
+
+    const hideSub = Keyboard.addListener("keyboardDidHide", (event) => {
+      setIsFocused(false);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    }
+  }, []);
 
   const txRef = React.useMemo(() => {
     return `${currentUser?.uid}-${Date.now()}`;
   }, [currentUser]);
-
-  const [amount, setAmount] = React.useState<string>("");
 
   const onSubmit = async () => {
     if (!paystackRef.current) return;
@@ -68,21 +93,6 @@ const FundWallet = (): JSX.Element => {
       message: "Your wallet has been funded successfully",
     });
   }
-
-  React.useEffect(() => {
-    const showSub = Keyboard.addListener("keyboardDidShow", (event) => {
-      setIsFocused(true);
-    });
-
-    const hideSub = Keyboard.addListener("keyboardDidHide", (event) => {
-      setIsFocused(false);
-    });
-
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    }
-  }, []);
 
   return (
     <View style={styles.container}>
