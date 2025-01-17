@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, Pressable } from "react-native";
 
 import { Image } from "expo-image";
 
-import { useInfo } from "@/context/info";
+import { useAppContext } from "@/context/AppContext";
 
 import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gorhom/bottom-sheet";
 
@@ -12,7 +12,7 @@ import RoadPathImg from "@/assets/images/static/road-path.svg";
 
 
 const InfoSheet = (): JSX.Element => {
-  const { info, setInfo } = useInfo();
+  const { info, setInfo } = useAppContext();
   const snapPoints = React.useMemo(() => ["15%"], []);
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
 

@@ -3,7 +3,7 @@ import React from "react";
 import { SelectedRoute } from "@/types";
 
 
-interface CreateRideContextType {
+export interface CreateRideContextType {
   createRideMode: boolean;
   selectedRoute: SelectedRoute;
   setCreateRideMode: (createRideMode: boolean) => void;
@@ -11,17 +11,7 @@ interface CreateRideContextType {
 }
 
 
-const CreateRideContext = React.createContext<CreateRideContextType>({} as CreateRideContextType);
-
-export const useCreateRide = () => React.useContext(CreateRideContext);
-
-
-interface CreateRideProviderProps {
-  children: React.ReactNode;
-}
-
-
-const CreateRideProvider = ({ children }: CreateRideProviderProps): JSX.Element => {
+export const useCreateRideState = (): CreateRideContextType => {
   const [createRideMode, setCreateRideMode] = React.useState<boolean>(false);
   const [selectedRoute, setSelectedRoute] = React.useState<SelectedRoute>({} as SelectedRoute);
 
@@ -31,18 +21,11 @@ const CreateRideProvider = ({ children }: CreateRideProviderProps): JSX.Element 
     }
   }, [createRideMode]);
 
-  return (
-    <CreateRideContext.Provider value={{
-      selectedRoute,
-      setSelectedRoute,
+  return {
+    selectedRoute,
+    setSelectedRoute,
 
-      createRideMode,
-      setCreateRideMode,
-    }}>
-      {children}
-    </CreateRideContext.Provider>
-  );
-}
-
-
-export default CreateRideProvider;
+    createRideMode,
+    setCreateRideMode,
+  };
+};

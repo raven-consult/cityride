@@ -7,14 +7,13 @@ import { Image } from "expo-image";
 import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gorhom/bottom-sheet";
 
 import { Info } from "@/types";
-import { useRide } from "@/context/ride";
-import { useInfo } from "@/context/info";
 import CloseIcon from "@/assets/icons/close.svg";
+import { useAppContext } from "@/context/AppContext";
 
 
 const RideInfo = (): JSX.Element => {
-  const { setInfo } = useInfo();
-  const { ride, setCurrentRide } = useRide();
+  const { setInfo } = useAppContext();
+  const { ride, setCurrentRide } = useAppContext();
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const snapPoints = React.useMemo(() => ["15%", "30%"], []);
 

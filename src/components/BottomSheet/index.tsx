@@ -9,10 +9,7 @@ import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetScrollView, Botto
 
 import { Ride } from "@/types";
 import { useDebounce } from "@/utils";
-import { useRide } from "@/context/ride";
-import { useInfo } from "@/context/info";
-import { useStation } from "@/context/station";
-import { useCreateRide } from "@/context/createRide";
+import { useAppContext } from "@/context/AppContext";
 import { getNearestStation } from "@/services/stations";
 import { getRidesStartingAtStation } from "@/services/rides";
 
@@ -23,13 +20,13 @@ import ChevronIcon from "@/assets/icons/chevron.svg";
 
 
 const BottomSheet = (): JSX.Element => {
-  const { ride, setCurrentRide } = useRide();
+  const { ride, setCurrentRide } = useAppContext();
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const snapPoints = React.useMemo(() => ["15%", "30%"], []);
 
-  const { info } = useInfo();
-  const { currentStation, setCurrentStation } = useStation();
-  const { createRideMode, setCreateRideMode } = useCreateRide();
+  const { info } = useAppContext();
+  const { currentStation, setCurrentStation } = useAppContext();
+  const { createRideMode, setCreateRideMode } = useAppContext();
 
   const [rides, setRides] = React.useState<Ride[]>([]);
   const [query, setQuery] = React.useState<string>("");
