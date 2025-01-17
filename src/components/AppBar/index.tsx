@@ -16,12 +16,19 @@ import BellIcon from "@/assets/icons/bell.svg";
 const AppBar = (): JSX.Element => {
   const router = useRouter();
   const { pendingRide } = useAppContext();
+  const { setCurrentRide } = useAppContext();
 
   const [currentUser, setCurrentUser] = React.useState<FirebaseAuthTypes.User | null>(null);
 
   const onPressNotification = () => {
     router.push("/(utils)/notifications");
   };
+
+  const onPressPendingRide = () => {
+    if (pendingRide) {
+      setCurrentRide(pendingRide);
+    }
+  }
 
   React.useEffect(() => {
     const subscriber = auth()
@@ -62,9 +69,9 @@ const AppBar = (): JSX.Element => {
           </Pressable>
         </View>
         {pendingRide && (
-          <View style={styles.bannerContainer}>
-            <Text style={textStyles.bannerText}>You have a ride scheduled for 10 mins from now</Text>
-          </View>
+          <Pressable onPress={onPressPendingRide} style={styles.bannerContainer}>
+            <Text style={textStyles.bannerText}>You have a ride scheduled for {pendingRide.driverArrival} mins from now</Text>
+          </Pressable>
         )}
       </View>
     </View>
