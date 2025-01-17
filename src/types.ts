@@ -12,7 +12,9 @@ export interface Ride {
     start: Station;
     end: Station;
   }
+  numPassengers: number;
   driverArrival: number;
+  maxPassengers: number;
 }
 
 export interface Coordinate {

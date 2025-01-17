@@ -1,16 +1,30 @@
 import auth from "@react-native-firebase/auth";
-import firestore from "@react-native-firebase/firestore";
 
 import { getUrl } from "@/utils";
-import { DriverRideInfo, Ride } from "@/types";
+import { DriverRideInfo } from "@/types";
 
 
 export const getRidesStartingAtStation = async (stationId: string) => {
-  const rides = await firestore().collection("rides")
-    .where("itenary.start.id", "==", stationId)
-    .get();
+  const url = getUrl("rideShare-getAvailableRides");
+  const authToken = await auth().currentUser?.getIdToken();
+  const req = { stationId } as { stationId: string };
 
-  return rides.docs.map((ride) => ({ ...ride.data(), id: ride.id }) as Ride);
+  const res = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(req),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text);
+  }
+
+  const rides = await res.json();
+  return rides;
 }
 
 interface CreateRideRequest {
@@ -20,22 +34,10 @@ interface CreateRideRequest {
   startStation: string;
 }
 
-export const createRide = async (
-  driver: string,
-  price: number,
-  startStation: string,
-  endStation: string,
-): Promise<DriverRideInfo> => {
-
+export const createRide = async (driver: string, price: number, startStation: string, endStation: string): Promise<DriverRideInfo> => {
   const url = getUrl("rideShare-createRide");
   const authToken = await auth().currentUser?.getIdToken();
-
-  const req = {
-    driver,
-    price,
-    startStation,
-    endStation,
-  } as CreateRideRequest;
+  const req = { driver, price, startStation, endStation} as CreateRideRequest;
 
   const response = await fetch(url, {
     method: "POST",

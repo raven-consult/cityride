@@ -5,7 +5,6 @@ import { Dropdown } from "react-native-element-dropdown";
 import GoogleMapView, { PROVIDER_GOOGLE, Marker as RNMarker } from "react-native-maps";
 
 import { Station } from "@/types";
-import { TextButton } from "@/design/ui/Button";
 import { hasPlayServices } from "@/services/auth";
 import { getAllStations } from "@/services/stations";
 import { useAppContext } from "@/context/AppContext";
@@ -105,13 +104,26 @@ const MapView = (): JSX.Element => {
           </View>
         )}
 
-        <TextButton
-          onPress={() => {
-            const index = Math.floor(Math.random() * stations.length);
-            onPressStation(stations[index]);
-          }}>
-          <Text>Click on Station</Text>
-        </TextButton>
+        <View style={{
+          gap: 16,
+          width: "100%",
+          alignItems: "center",
+          flexDirection: "row",
+          paddingHorizontal: 12,
+        }}>
+          <Select
+            placeholder="Current Station"
+            data={formatStations}
+            value={"Abuja"}
+            style={{
+              flex: 1,
+            }}
+            onChange={(val) => {
+              const station = stations.filter(station => station.id === val.value)[0];
+              onPressStation(station);
+            }}
+          />
+        </View>
       </View>
     );
   } else {
