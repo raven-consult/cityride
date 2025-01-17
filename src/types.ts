@@ -30,7 +30,7 @@ export interface Ride {
     start: Station;
     end: Station;
   }
-  numPassengers: number;
+  driverId: string;
   driverArrival: number;
   maxPassengers: number;
 }
@@ -97,8 +97,10 @@ export interface PassengerRideInfo {
     end: Station;
     start: Station;
   }
+  price: number;
   driver: Driver;
   userAuthCode: string;
+  maxPassengers: number;
   metadata: RideMetadata;
 }
 

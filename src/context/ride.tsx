@@ -1,18 +1,18 @@
 import React from "react";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ride } from "@/types";
+import { Ride, PassengerRideInfo } from "@/types";
 
 
 export interface RideContextType {
-  ride: Ride | null;
-  setCurrentRide: React.Dispatch<React.SetStateAction<Ride | null>>;
+  ride: PassengerRideInfo | null;
+  setCurrentRide: React.Dispatch<React.SetStateAction<PassengerRideInfo | null>>;
   pendingRide: Ride | null;
   setPendingRide: React.Dispatch<React.SetStateAction<Ride | null>>;
 }
 
 export const useRideState = (): RideContextType => {
-  const [ride, setCurrentRide] = React.useState<Ride | null>(null);
+  const [ride, setCurrentRide] = React.useState<PassengerRideInfo | null>(null);
   const [pendingRide, setPendingRide] = React.useState<Ride | null>(null);
 
   const pendingRideKey = "pendingRide";

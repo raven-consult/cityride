@@ -5,10 +5,10 @@ import { View, Text, TextInput, StyleSheet, Pressable, ActivityIndicator } from 
 import { Image } from "expo-image";
 import * as Location from "expo-location";
 
-import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetScrollView, BottomSheetView } from "@gorhom/bottom-sheet";
+import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 
-import { Ride } from "@/types";
 import { useDebounce } from "@/utils";
+import { PassengerRideInfo } from "@/types";
 import { useAppContext } from "@/context/AppContext";
 import { getNearestStation } from "@/services/stations";
 import { getRidesStartingAtStation } from "@/services/rides";
@@ -28,10 +28,10 @@ const BottomSheet = (): JSX.Element => {
   const { currentStation, setCurrentStation } = useAppContext();
   const { createRideMode, setCreateRideMode } = useAppContext();
 
-  const [rides, setRides] = React.useState<Ride[]>([]);
+  const [rides, setRides] = React.useState<PassengerRideInfo[]>([]);
   const [query, setQuery] = React.useState<string>("");
   const [loading, setLoading] = React.useState<boolean>(false);
-  const [searchResults, setSearchResults] = React.useState<Ride[]>([]);
+  const [searchResults, setSearchResults] = React.useState<PassengerRideInfo[]>([]);
 
   const debouncedQuery = useDebounce<string>(query, 100);
 
@@ -78,7 +78,7 @@ const BottomSheet = (): JSX.Element => {
     })();
   }, []);
 
-  const onPressItem = (ride: Ride) => {
+  const onPressItem = (ride: PassengerRideInfo) => {
     setCurrentRide(ride);
   }
 
@@ -200,7 +200,7 @@ export default BottomSheet;
 
 
 interface RideItemProps {
-  ride: Ride;
+  ride: PassengerRideInfo;
   onPress?: () => void;
 }
 

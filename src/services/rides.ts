@@ -1,10 +1,10 @@
 import auth from "@react-native-firebase/auth";
 
 import { getUrl } from "@/utils";
-import { DriverRideInfo } from "@/types";
+import { DriverRideInfo, PassengerRideInfo } from "@/types";
 
 
-export const getRidesStartingAtStation = async (stationId: string) => {
+export const getRidesStartingAtStation = async (stationId: string): Promise<PassengerRideInfo[]> => {
   const url = getUrl("rideShare-getAvailableRides");
   const authToken = await auth().currentUser?.getIdToken();
   const req = { stationId } as { stationId: string };
