@@ -50,7 +50,7 @@ export const createRide = onRequest(async (req, res) => {
     res.status(400).send("Start point does not exist");
     return;
   }
-  const startStationData = {...startStationDoc.data(), id: startStationDoc.id} as Station;
+  const startStationData = { ...startStationDoc.data(), id: startStationDoc.id } as Station;
 
   // Check if end is bus stops
   const endStationDoc = await database.collection("stations").doc(endStation).get();
@@ -59,7 +59,7 @@ export const createRide = onRequest(async (req, res) => {
     logger.error("A User tried to create with ride with invalid destination point", driver);
     return;
   }
-  const endStationData = {...endStationDoc.data(), id: endStationDoc.id} as Station;
+  const endStationData = { ...endStationDoc.data(), id: endStationDoc.id } as Station;
 
   const rideId = database.collection("rides").doc().id;
   const ride: Ride = {
@@ -132,36 +132,68 @@ export const getAvailableRides = onRequest(async (req, res) => {
   res.status(200).send(availableRides);
 });
 
+
+function checkRideIsFull(ride: Ride) {
+  return ride.maxPassengers === Object.keys(ride.passengers).length;
+}
+
+function checkUserNotInRide(ride: Ride, userId: string) {
+  return !Object.keys(ride.passengers).includes(userId);
+}
+
+function checkUserHasNoPendingRide(userId: string): boolean {
+  throw new Error("Not implemented");
+}
+
+function checkUserHasEnoughBalance(userId: string): boolean {
+  throw new Error("Not implemented");
+}
+
 /**
- * Passenger boards a ride
+ * Adds a passenger to a ride. It generates a unique code for the passenger
  * and sends a notification to the driver about the new passenger.
- * 
- * It returns an error if the ride is full or the
- * passenger is already in the ride.
  */
 export const boardRide = onRequest(async (req, res) => {
   if (!isAuthorized(req, res)) return;
 
-  // TODO: Check if ride is not full
-  // TODO: Check if user is not a driver
-  // TODO: Check if user is not already in a ride
-  // TODO: Check if user is not already in the ride
-  // TODO: Check if user has enough balance to pay for the ride
-
   const { rideId, passengerId } = req.body;
 
-  const rideRef = database.collection("rides").doc(rideId);
-  const ride = (await rideRef.get()).data() as Ride;
+  /////// [Checks] //////////////////////////
 
-  if (!ride) {
+  const rideRef = database.collection("rides").doc(rideId);
+  const rideDoc = await rideRef.get();
+  if (!rideDoc.exists) {
     res.status(404).send("Ride not found");
     return;
   }
 
-  if (ride.maxPassengers === Object.keys(ride.passengers).length) {
+  const ride = rideDoc.data() as Ride;
+
+  const isRideFull = checkRideIsFull(ride);
+  if (isRideFull) {
     res.status(400).send("Ride is full");
     return;
   }
+
+  const isUserInRide = checkUserNotInRide(ride, passengerId);
+  if (!isUserInRide) {
+    res.status(400).send("User is already in the ride");
+    return;
+  }
+
+  const userHasNoPendingRide = checkUserHasNoPendingRide(passengerId);
+  if (!userHasNoPendingRide) {
+    res.status(400).send("User has a pending ride");
+    return;
+  }
+
+  const userHasEnoughBalance = checkUserHasEnoughBalance(passengerId);
+  if (!userHasEnoughBalance) {
+    res.status(400).send("User does not have enough balance");
+    return;
+  }
+
+  /////// [Checks] //////////////////////////
 
   ride.passengers[passengerId] = {
     id: passengerId,
@@ -169,12 +201,17 @@ export const boardRide = onRequest(async (req, res) => {
     code: generateCode(),
   };
 
+  // This adds the passenger to the temporary checks storage
+  // This will reduce the cost of reads for other operations like
+  // confirming the passenger, etc
   await admin
     .database()
     .ref(`/rides/${rideId}/passengers/${passengerId}`)
     .set(ride.passengers[passengerId]);
 
   await rideRef.set(ride, { merge: true });
+
+  // [START] Send notification to driver
 
   const driverNotificationToken = await admin
     .database()
@@ -203,6 +240,8 @@ export const boardRide = onRequest(async (req, res) => {
   } catch (error) {
     logger.error(error);
   }
+
+  // [END] Send notification to driver
 
   const rideInfo: PassengerRideInfo = {
     id: rideId,
