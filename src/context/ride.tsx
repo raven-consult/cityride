@@ -53,5 +53,17 @@ const RideProvider = ({ children }: RideProviderProps): JSX.Element => {
   );
 };
 
+export const useRideState = () => {
+  const context = React.useContext(RideContext);
+  if (!context) {
+    throw new Error("useRideState must be used within a RideProvider");
+  }
+  return {
+    ride: context.ride,
+    setRide: context.setCurrentRide,
+    pendingRide: context.pendingRide,
+    setPendingRide: context.setPendingRide,
+  };
+};
 
 export default RideProvider;

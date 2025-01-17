@@ -11,29 +11,13 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-
-import RideProvider from "@/context/ride";
-import InfoProvider from "@/context/info";
+import AppContextProvider from "@/context/AppContext";
 import RideInfo from "@/components/RideInfo";
 import useDMSans from "@/design/fonts/DM_Sans";
 import InfoSheet from "@/components/InfoSheet";
-import StationProvider from "@/context/station";
 import CreateRide from "@/components/CreateRide";
-import CreateRideProvider from "@/context/createRide";
-
 
 SplashScreen.preventAutoHideAsync();
-
-
-// if (__DEV__) {
-//   const firebaseEmulatorHost = process.env.EXPO_PUBLIC_EMULATOR_HOST || "localhost";
-
-//   console.log("is dev");
-//   database().useEmulator(firebaseEmulatorHost, 9000);
-//   firestore().useEmulator(firebaseEmulatorHost, 8080);
-//   auth().useEmulator(`http://${firebaseEmulatorHost}:9099`);
-// }
-
 
 const RootLayout = (): JSX.Element => {
   const [loaded] = useDMSans();
@@ -69,28 +53,21 @@ const RootLayout = (): JSX.Element => {
 
   return (
     <GestureHandlerRootView>
-      <RideProvider>
-        <StationProvider>
-          <CreateRideProvider>
-            <InfoProvider>
-              <Stack screenOptions={{
-                animation: "fade",
-                headerShown: false,
-                contentStyle: { backgroundColor: "white" },
-              }}>
-                <Stack.Screen name="(app)" />
-                <Stack.Screen name="(onboarding)" />
-              </Stack>
-              <RideInfo />
-              <InfoSheet />
-              <CreateRide />
-            </InfoProvider>
-          </CreateRideProvider>
-        </StationProvider>
-      </RideProvider>
+      <AppContextProvider>
+        <Stack screenOptions={{
+          animation: "fade",
+          headerShown: false,
+          contentStyle: { backgroundColor: "white" },
+        }}>
+          <Stack.Screen name="(app)" />
+          <Stack.Screen name="(onboarding)" />
+        </Stack>
+        <RideInfo />
+        <InfoSheet />
+        <CreateRide />
+      </AppContextProvider>
     </GestureHandlerRootView>
   );
 };
-
 
 export default RootLayout;

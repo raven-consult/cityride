@@ -26,5 +26,6 @@ const InfoProvider = ({ children }: InfoProviderProps): JSX.Element => {
   );
 };
 
+export { info, setInfo };
 
 export default InfoProvider;

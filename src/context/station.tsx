@@ -6,11 +6,9 @@ interface StationContextType {
   setCurrentStation: (stations: Station | null) => void;
 }
 
-
 const StationContext = React.createContext<StationContextType>({} as StationContextType);
 
 export const useStation = () => React.useContext(StationContext);
-
 
 interface StationProviderProps {
   children: React.ReactNode;
@@ -26,5 +24,6 @@ const StationProvider = ({ children }: StationProviderProps): JSX.Element => {
   );
 };
 
-
 export default StationProvider;
+
+export { currentStation, setCurrentStation };

@@ -44,5 +44,17 @@ const CreateRideProvider = ({ children }: CreateRideProviderProps): JSX.Element 
   );
 }
 
+export const useCreateRideState = () => {
+  const context = React.useContext(CreateRideContext);
+  if (!context) {
+    throw new Error("useCreateRideState must be used within a CreateRideProvider");
+  }
+  return {
+    createRideMode: context.createRideMode,
+    setCreateRideMode: context.setCreateRideMode,
+    selectedRoute: context.selectedRoute,
+    setSelectedRoute: context.setSelectedRoute,
+  };
+};
 
 export default CreateRideProvider;
