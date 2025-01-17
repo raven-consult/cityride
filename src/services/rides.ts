@@ -55,3 +55,27 @@ export const createRide = async (driver: string, price: number, startStation: st
 
   return response.json();
 }
+
+
+export const boardRide = async (rideId: string, passengerId: string) => {
+  const url = getUrl("rideShare-boardRide");
+  const authToken = await auth().currentUser?.getIdToken();
+
+  const req = { rideId, passengerId } as { rideId: string, passengerId: string };
+
+  const res = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(req),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text);
+  }
+
+  return res.json();
+} 
