@@ -122,6 +122,7 @@ export const getAvailableRides = onRequest(async (req, res) => {
     // .filter((ride) => ride.metadata.driverArrrivalTimeMins <= kAllowedWaitTimeMins)
     .map((ride) => ({
       id: ride.id,
+      price: ride.price,
       driver: ride.driver,
       itenary: ride.itenary,
       metadata: ride.metadata,
@@ -205,6 +206,7 @@ export const boardRide = onRequest(async (req, res) => {
 
   const rideInfo: PassengerRideInfo = {
     id: rideId,
+    price: ride.price,
     driver: ride.driver,
     itenary: ride.itenary,
     metadata: ride.metadata,
@@ -524,6 +526,7 @@ interface PassengerRideInfo {
     end: Station;
     start: Station;
   }
+  price: number;
   driver: Driver;
   userAuthCode: string;
   maxPassengers: number;
