@@ -4,11 +4,13 @@ import { View, Text, StyleSheet, Pressable } from "react-native";
 
 import { Image } from "expo-image";
 
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gorhom/bottom-sheet";
 
 import { Info } from "@/types";
 import CloseIcon from "@/assets/icons/close.svg";
 import { useAppContext } from "@/context/AppContext";
+import { boardRide } from "@/services/rides";
 
 
 const RideInfo = (): JSX.Element => {
@@ -16,6 +18,16 @@ const RideInfo = (): JSX.Element => {
   const { ride, setCurrentRide } = useAppContext();
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const snapPoints = React.useMemo(() => ["15%", "30%"], []);
+
+  const [currentUser, setCurrentUser] = React.useState<FirebaseAuthTypes.User | null>(null);
+
+  React.useEffect(() => {
+    const sub = auth().onAuthStateChanged(user => {
+      setCurrentUser(user);
+    });
+
+    return sub;
+  }, []);
 
   React.useEffect(() => {
     if (ride) {
@@ -27,7 +39,10 @@ const RideInfo = (): JSX.Element => {
 
   const clearRide = () => setCurrentRide(null);
 
-  const boardRide = () => {
+  const onPressBoardRide = async () => {
+    if(!ride || !currentUser) return;
+
+    await boardRide(ride.id, currentUser.uid);
     clearRide();
     setInfo({} as Info);
   }
@@ -97,7 +112,7 @@ const RideInfo = (): JSX.Element => {
             />
           </Pressable>
           <Pressable
-            onPress={boardRide}
+            onPress={onPressBoardRide}
             style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
             <Text style={textStyles.boardRideText}>Board Ride</Text>
           </Pressable>
@@ -113,12 +128,12 @@ const RideInfo = (): JSX.Element => {
             />
           </Pressable>
           <Pressable
-            onPress={boardRide}
+            // onPress={boardRide}
             style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
             <Text style={textStyles.boardRideText}>View Ticket</Text>
           </Pressable>
           <Pressable
-            onPress={boardRide}
+            // onPress={boardRide}
             style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
             <Text style={textStyles.boardRideText}>Cancel Ride</Text>
           </Pressable>
@@ -134,12 +149,12 @@ const RideInfo = (): JSX.Element => {
             />
           </Pressable>
           <Pressable
-            onPress={boardRide}
+            // onPress={boardRide}
             style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
             <Text style={textStyles.boardRideText}>Scan QR Code</Text>
           </Pressable>
           <Pressable
-            onPress={boardRide}
+            // onPress={boardRide}
             style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
             <Text style={textStyles.boardRideText}>Cancel Ride</Text>
           </Pressable>
