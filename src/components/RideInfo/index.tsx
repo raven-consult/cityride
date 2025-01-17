@@ -32,6 +32,29 @@ const RideInfo = (): JSX.Element => {
     setInfo({} as Info);
   }
 
+  const driverArrival = React.useMemo(() => {
+    const arrival = ride?.driverArrival;
+    return `${arrival} mins`;
+  }, [ride]);
+
+  const itenary = React.useMemo(() => {
+    const end = ride?.itenary.end.name;
+    const start = ride?.itenary.start.name;
+    return `${start} → ${end}`;
+  }, [ride]);
+
+  const price = React.useMemo(() => {
+    return ride
+      ?.price
+      .toLocaleString("en-NG", {
+        style: "currency",
+        currency: "NGN" });
+  }, [ride]);
+
+  const maxPassengers = React.useMemo(() => {
+    return `${ride?.maxPassengers} seats`;
+  }, [ride]);
+
   return (
     <RNBottomSheet
       index={-1}
@@ -44,21 +67,21 @@ const RideInfo = (): JSX.Element => {
     >
       <BottomSheetView style={styles.container}>
         <View style={styles.header}>
-          <Text style={textStyles.mainText}>PO124AC</Text>
-          <Text style={textStyles.itenaryText}>Iyana Oworo → Lekki Phase One</Text>
+          <Text style={textStyles.mainText}>{ride?.id}</Text>
+          <Text style={textStyles.itenaryText}>{itenary}</Text>
         </View>
 
         <View style={styles.rideDetailsGrid}>
           <View style={styles.rideDetailsItemContainer}>
-            <Text style={textStyles.rideDetailValue}>3 mins</Text>
+            <Text style={textStyles.rideDetailValue}>{driverArrival}</Text>
             <Text style={textStyles.rideDetailTitle}>Arriving in</Text>
           </View>
           <View style={styles.rideDetailsItemContainer}>
-            <Text style={textStyles.rideDetailValue}>₦500</Text>
+            <Text style={textStyles.rideDetailValue}>{price}</Text>
             <Text style={textStyles.rideDetailTitle}>Price</Text>
           </View>
           <View style={styles.rideDetailsItemContainer}>
-            <Text style={textStyles.rideDetailValue}>3 seats</Text>
+            <Text style={textStyles.rideDetailValue}>{maxPassengers}</Text>
             <Text style={textStyles.rideDetailTitle}>Passengers</Text>
           </View>
         </View>
@@ -152,7 +175,7 @@ const textStyles = StyleSheet.create({
     fontFamily: "DMSans-Regular",
   },
   rideDetailValue: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: "DMSans-Bold",
     color: "hsl(0, 0%, 29%)",
   },
