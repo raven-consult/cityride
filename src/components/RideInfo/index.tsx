@@ -33,7 +33,7 @@ const RideInfo = (): JSX.Element => {
   }
 
   const driverArrival = React.useMemo(() => {
-    const arrival = ride?.driverArrival;
+    const arrival = ride?.metadata.driverArrival;
     return `${arrival} mins`;
   }, [ride]);
 
@@ -52,7 +52,7 @@ const RideInfo = (): JSX.Element => {
   }, [ride]);
 
   const maxPassengers = React.useMemo(() => {
-    return `${ride?.maxPassengers} seats`;
+    return `${ride?.metadata.maxPassengers} seats`;
   }, [ride]);
 
   return (

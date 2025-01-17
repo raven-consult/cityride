@@ -70,7 +70,7 @@ const AppBar = (): JSX.Element => {
         </View>
         {pendingRide && (
           <Pressable onPress={onPressPendingRide} style={styles.bannerContainer}>
-            <Text style={textStyles.bannerText}>You have a ride scheduled for {pendingRide.driverArrival} mins from now</Text>
+            <Text style={textStyles.bannerText}>You have a ride scheduled for {pendingRide.metadata.driverArrival} mins from now</Text>
           </Pressable>
         )}
       </View>

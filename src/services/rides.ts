@@ -1,7 +1,7 @@
 import auth from "@react-native-firebase/auth";
 
+import { Ride } from "@/types";
 import { getUrl } from "@/utils";
-import { DriverRideInfo } from "@/types";
 
 
 export const getRidesStartingAtStation = async (stationId: string) => {
@@ -34,7 +34,7 @@ interface CreateRideRequest {
   startStation: string;
 }
 
-export const createRide = async (driver: string, price: number, startStation: string, endStation: string): Promise<DriverRideInfo> => {
+export const createRide = async (driver: string, price: number, startStation: string, endStation: string): Promise<Ride> => {
   const url = getUrl("rideShare-createRide");
   const authToken = await auth().currentUser?.getIdToken();
   const req = { driver, price, startStation, endStation} as CreateRideRequest;

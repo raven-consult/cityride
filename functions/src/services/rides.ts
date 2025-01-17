@@ -6,6 +6,7 @@ import { Expo, ExpoPushMessage } from "expo-server-sdk";
 
 import { isAuthorized } from "../utils";
 import { PassengerPayDriverForRide } from "./wallet";
+import { MapResponse, Passengers, Ride, Station, UserData } from "../types";
 
 
 // const kAllowedWaitTimeMins = 30;
@@ -30,8 +31,6 @@ export interface CreateRideRequest {
 export const createRide = onRequest(async (req, res) => {
   if (!isAuthorized(req, res)) return;
 
-  // TODO: Check if user is an authorized driver
-
   const { driver, startStation, endStation, price } = (req.body as CreateRideRequest);
 
   // Check if driver is driver
@@ -41,7 +40,13 @@ export const createRide = onRequest(async (req, res) => {
     res.status(400).send("Driver does not exist");
     return;
   }
-  const driverInfo = driverData.data() as RiderUserData;
+
+  const driverInfo = driverData.data() as UserData;
+  if (driverInfo.role !== "driver") {
+    logger.error("A User tried to create with ride with invalid driver", driver);
+    res.status(400).send("User is not a driver");
+    return;
+  }
 
   // Check if start is bus stops
   const startStationDoc = await database.collection("stations").doc(startStation).get();
@@ -50,7 +55,7 @@ export const createRide = onRequest(async (req, res) => {
     res.status(400).send("Start point does not exist");
     return;
   }
-  const startStationData = {...startStationDoc.data(), id: startStationDoc.id} as Station;
+  const startStationData = { ...startStationDoc.data(), id: startStationDoc.id } as Station;
 
   // Check if end is bus stops
   const endStationDoc = await database.collection("stations").doc(endStation).get();
@@ -59,45 +64,32 @@ export const createRide = onRequest(async (req, res) => {
     logger.error("A User tried to create with ride with invalid destination point", driver);
     return;
   }
-  const endStationData = {...endStationDoc.data(), id: endStationDoc.id} as Station;
+  const endStationData = { ...endStationDoc.data(), id: endStationDoc.id } as Station;
+
+  // TODO: Use the driver's coordinates and the start station coordinates
+  // const routeData = await getGMapsRoutes(startStationData.coordinates, endStationData.coordinates);
+  const timeMins = 5;
+  const driverArrivalTimestamp = Date.now() + timeMins * 60 * 1000;
 
   const rideId = database.collection("rides").doc().id;
   const ride: Ride = {
+    id: rideId,
     itenary: {
       end: endStationData,
       start: startStationData,
     },
     price,
-    driver: {
-      id: driver,
-      carNumber: driverInfo.driver.carNumber,
-    },
-    passengers: {},
-    metadata: {} as RideMetadata,
-    maxPassengers: driverInfo.driver.maxPassengers,
+    metadata: {
+      driverId: driver,
+      driverArrivalTimestamp,
+      maxPassengers: driverInfo.driverInfo!.maxPassengers,
+    }
   };
 
-  // TODO: Use the driver's coordinates and the start station coordinates
-  // const routeData = await getGMapsRoutes(startStationData.coordinates, endStationData.coordinates);
-  ride.metadata = {
-    ...ride.metadata,
-    driverArrivalMins: 5,
-  }
-
   await database.collection("rides").doc(rideId).set(ride);
+  await admin.database().ref(`/rides/${rideId}/passengers`).set({});
 
-  const driverRideInfo: DriverRideInfo = {
-    id: rideId,
-    price: ride.price,
-    itenary: {
-      end: endStationData,
-      start: startStationData,
-    },
-    driver: { id: driver },
-    metadata: ride.metadata,
-  }
-
-  res.status(200).send(driverRideInfo);
+  res.status(200).send(ride);
 });
 
 
@@ -120,14 +112,6 @@ export const getAvailableRides = onRequest(async (req, res) => {
   const availableRides = rides.docs
     .map((doc) => ({ ...doc.data(), id: doc.id }) as Ride)
     // .filter((ride) => ride.metadata.driverArrrivalTimeMins <= kAllowedWaitTimeMins)
-    .map((ride) => ({
-      id: ride.id,
-      price: ride.price,
-      driver: ride.driver,
-      itenary: ride.itenary,
-      metadata: ride.metadata,
-      maxPassengers: ride.maxPassengers,
-    }) as PassengerRideInfo);
 
   res.status(200).send(availableRides);
 });
@@ -153,48 +137,46 @@ export const boardRide = onRequest(async (req, res) => {
   const rideRef = database.collection("rides").doc(rideId);
   const ride = (await rideRef.get()).data() as Ride;
 
+  const rideRtdbRef = admin.database().ref(`/rides/${rideId}`);
+  const passengers = (await rideRtdbRef.child("passengers").get()).toJSON() as Passengers;
+
   if (!ride) {
     res.status(404).send("Ride not found");
     return;
   }
 
-  if (ride.maxPassengers === Object.keys(ride.passengers).length) {
+  if (ride.metadata.maxPassengers === Object.keys(passengers).length) {
     res.status(400).send("Ride is full");
     return;
   }
 
-  ride.passengers[passengerId] = {
+  const passengerCode = generateCode();
+
+  await rideRtdbRef.child(`passengers/${passengerId}`).set({
     id: passengerId,
     verified: false,
-    code: generateCode(),
-  };
-
-  await admin
-    .database()
-    .ref(`/rides/${rideId}/passengers/${passengerId}`)
-    .set(ride.passengers[passengerId]);
-
-  await rideRef.set(ride, { merge: true });
+    code: passengerCode,
+  });
 
   const driverNotificationToken = await admin
     .database()
-    .ref(`/users/${ride.driver.id}/notificationToken`)
+    .ref(`/users/${ride.metadata.driverId}/notificationToken`)
     .get();
 
   if (!driverNotificationToken.exists) {
     logger.error(`Could not send notification to driver:
-      ${ride.driver.id} of ride: ${ride.id} because notification token does not exist`);
+      ${ride.metadata.driverId} of ride: ${ride.id} because notification token does not exist`);
   }
 
   const notificationToken = driverNotificationToken.val();
   if (!Expo.isExpoPushToken(notificationToken)) {
-    logger.error(`Could not send notification to driver: ${ride.driver.id} of ride: ${ride.id}`);
+    logger.error(`Could not send notification to driver: ${ride.metadata.driverId} of ride: ${ride.id}`);
   }
 
   const message = {
     sound: "default",
-    title: "New Passenger",
     to: notificationToken,
+    title: "New Passenger",
     body: "A new passenger has joined your ride",
   } as ExpoPushMessage;
 
@@ -204,30 +186,18 @@ export const boardRide = onRequest(async (req, res) => {
     logger.error(error);
   }
 
-  const rideInfo: PassengerRideInfo = {
-    id: rideId,
-    price: ride.price,
-    driver: ride.driver,
-    itenary: ride.itenary,
-    metadata: ride.metadata,
-    maxPassengers: ride.maxPassengers,
-    userAuthCode: ride.passengers[passengerId].code,
-  }
-
-  res.status(200).send(rideInfo);
+  res.status(200).send(passengerCode);
 });
 
 // TODO: Add comments
 export const confirmPassenger = onRequest(async (req, res) => {
-  if (!isAuthorized(req, res)) return;
+  if (!await isAuthorized(req, res)) return;
 
-  // TODO: Check if user is a driver
-  // TODO: Check if the requester is a valid passenger of the ride
-  // TODO: Check if the code is valid
-  // TODO: Check if the passenger is not already verified
-  // TODO: Check if the ride is not already ended
-  // TODO: Check if the ride is not already started
-  // TODO: Check if the ride is not already full
+  const authUser = await isAuthorized(req, res);
+  if (!authUser) {
+    res.status(401).send("Unauthorized");
+    return;
+  }
 
   const { rideId, code } = req.body;
 
@@ -239,11 +209,25 @@ export const confirmPassenger = onRequest(async (req, res) => {
     return;
   }
 
-  const passenger = Object.values(ride.passengers).find((passenger) => passenger.code === code);
+  if(ride.metadata.driverId !== authUser.uid) {
+    res.status(401).send("Unauthorized");
+    return;
+  }
+
+  const rideRtdbRef = admin.database().ref(`/rides/${rideId}`);
+  const passengers = (await rideRtdbRef.child("passengers").get()).toJSON() as Passengers;
+
+  const passenger = Object.values(passengers).find((passenger) => passenger.code === code);
 
   if (!passenger) {
-    logger.error(`Invalid code tried on ride: ${ride.id} by driver: ${ride.driver.id}`, ride);
+    logger.error(`Invalid code tried on ride: ${ride.id} by driver: ${ride.metadata.driverId}`, ride);
     res.status(400).send("Invalid code");
+    return;
+  }
+
+  if (passenger.verified) {
+    logger.error("Passenger is already verified", passenger);
+    res.status(400).send("Passenger is already verified");
     return;
   }
 
@@ -254,10 +238,10 @@ export const confirmPassenger = onRequest(async (req, res) => {
     // Pay the driver
     await PassengerPayDriverForRide(
       passenger.id,
-      ride.driver.id,
+      ride.metadata.driverId,
       ride.price,
       rideId,
-    )
+    );
   } catch (err) {
     res.status(400).send((err as Error).message);
     return;
@@ -323,8 +307,11 @@ export const sendArrivalNotification = onRequest(async (req, res) => {
     return;
   }
 
+  const rideRtdbRef = admin.database().ref(`/rides/${rideId}`);
+  const passengers = (await rideRtdbRef.child("passengers").get()).toJSON() as Passengers;
+
   const messages = [];
-  const passengerIds = Object.entries(ride.passengers);
+  const passengerIds = Object.entries(passengers);
 
   for (const passenger of passengerIds) {
     const [passengerId, _] = passenger;
@@ -367,7 +354,6 @@ export const sendArrivalNotification = onRequest(async (req, res) => {
 
   res.status(200).send("Arrival notification sent");
 });
-
 
 
 const generateCode = () => Math.random().toString(36).substring(2, 6);
@@ -467,101 +453,4 @@ function extractResponseFromApiData(apiData: any): MapResponse {
     mapData,
     trafficData,
   };
-}
-
-
-interface Coordinate {
-  latitude: number;
-  longitude: number;
-}
-
-interface Passenger {
-  id: string;
-  code: string;
-  verified: boolean;
-}
-
-export interface Station {
-  id: string;
-  name: string;
-  address: string;
-  coordinates: Coordinate;
-}
-
-interface RiderUserData {
-  id: string;
-  driver: {
-    carNumber: string;
-    maxPassengers: number;
-  }
-}
-
-interface Driver {
-  id: string;
-  carNumber: string;
-  // coordinates: Coordinate;
-}
-
-interface RideMetadata {
-  driverArrivalMins: number;
-}
-
-interface Ride {
-  id?: string;
-  price: number;
-  driver: Driver;
-  itenary: {
-    end: Station;
-    start: Station;
-  }
-  maxPassengers: number;
-  metadata: RideMetadata;
-  passengers: Record<string, Passenger>;
-}
-
-
-interface PassengerRideInfo {
-  id: string;
-  itenary: {
-    end: Station;
-    start: Station;
-  }
-  price: number;
-  driver: Driver;
-  userAuthCode: string;
-  maxPassengers: number;
-  metadata: RideMetadata;
-}
-
-export interface DriverRideInfo {
-  id: string;
-  price: number;
-  itenary: {
-    end: Station;
-    start: Station;
-  };
-  driver: { id: string };
-  metadata: RideMetadata;
-}
-
-type GeojsonLineString = [number, number];
-
-interface Step {
-  distance: number;
-  duration: number;
-  instruction: string;
-  polyline: GeojsonLineString[];
-}
-
-
-interface MapResponse {
-  mapData: {
-    distance: number;
-    directions: Step[];
-    polyline: GeojsonLineString[];
-  }
-  trafficData: {
-    timeMins: number;
-    trafficDensity: "sparse" | "medium" | "dense",
-  }
 }

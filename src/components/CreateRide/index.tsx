@@ -64,12 +64,7 @@ const CreateRide = (): JSX.Element => {
           selectedRoute.start!.id,
           selectedRoute.end!.id,
         );
-        setPendingRide({
-          id: res.id,
-          price: res.price,
-          itenary: res.itenary,
-          driverArrival: res.metadata.driverArrivalMins,
-        });
+        setPendingRide(res);
 
         setInfo({
           title: "Ride Created",
