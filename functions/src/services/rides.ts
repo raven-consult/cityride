@@ -111,10 +111,26 @@ export const getAvailableRides = onRequest(async (req, res) => {
 
   const availableRides = rides.docs
     .map((doc) => ({ ...doc.data(), id: doc.id }) as Ride)
-    // .filter((ride) => ride.metadata.driverArrrivalTimeMins <= kAllowedWaitTimeMins)
+  // .filter((ride) => ride.metadata.driverArrrivalTimeMins <= kAllowedWaitTimeMins)
 
   res.status(200).send(availableRides);
 });
+
+function checkRideIsFull(ride: Ride, passengers: Passengers) {
+  return ride.metadata.maxPassengers === Object.keys(passengers).length;
+}
+
+function checkUserNotInRide(passengers: Passengers, userId: string) {
+  return !Object.keys(passengers).includes(userId);
+}
+
+function checkUserHasNoPendingRide(userId: string): boolean {
+  throw new Error("Not implemented");
+}
+
+function checkUserHasEnoughBalance(userId: string): boolean {
+  throw new Error("Not implemented");
+}
 
 /**
  * Passenger boards a ride
@@ -125,12 +141,6 @@ export const getAvailableRides = onRequest(async (req, res) => {
  */
 export const boardRide = onRequest(async (req, res) => {
   if (!isAuthorized(req, res)) return;
-
-  // TODO: Check if ride is not full
-  // TODO: Check if user is not a driver
-  // TODO: Check if user is not already in a ride
-  // TODO: Check if user is not already in the ride
-  // TODO: Check if user has enough balance to pay for the ride
 
   const { rideId, passengerId } = req.body;
 
@@ -145,18 +155,42 @@ export const boardRide = onRequest(async (req, res) => {
     return;
   }
 
-  if (ride.metadata.maxPassengers === Object.keys(passengers).length) {
+  const isRideFull = checkRideIsFull(ride, passengers);
+  if (isRideFull) {
     res.status(400).send("Ride is full");
+    return;
+  }
+
+  const isUserInRide = checkUserNotInRide(passengers, passengerId);
+  if (!isUserInRide) {
+    res.status(400).send("User is already in the ride");
+    return;
+  }
+
+  const userHasNoPendingRide = checkUserHasNoPendingRide(passengerId);
+  if (!userHasNoPendingRide) {
+    res.status(400).send("User has a pending ride");
+    return;
+  }
+
+  const userHasEnoughBalance = checkUserHasEnoughBalance(passengerId);
+  if (!userHasEnoughBalance) {
+    res.status(400).send("User does not have enough balance");
     return;
   }
 
   const passengerCode = generateCode();
 
+  // This adds the passenger to the temporary checks storage
+  // This will reduce the cost of reads for other operations like
+  // confirming the passenger, etc
   await rideRtdbRef.child(`passengers/${passengerId}`).set({
     id: passengerId,
     verified: false,
     code: passengerCode,
   });
+
+  // [START] Send notification to driver
 
   const driverNotificationToken = await admin
     .database()
@@ -186,6 +220,8 @@ export const boardRide = onRequest(async (req, res) => {
     logger.error(error);
   }
 
+  // [END] Send notification to driver
+
   res.status(200).send(passengerCode);
 });
 
@@ -209,7 +245,7 @@ export const confirmPassenger = onRequest(async (req, res) => {
     return;
   }
 
-  if(ride.metadata.driverId !== authUser.uid) {
+  if (ride.metadata.driverId !== authUser.uid) {
     res.status(401).send("Unauthorized");
     return;
   }
