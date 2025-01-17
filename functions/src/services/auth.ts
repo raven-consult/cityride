@@ -2,17 +2,17 @@ import * as admin from "firebase-admin";
 import { auth } from "firebase-functions/v1";
 import { logger } from "firebase-functions/v2";
 import { onRequest } from "firebase-functions/v2/https";
-
+import { UserData } from "../types";
 
 export const initializeUserData = auth.user().onCreate((user) => {
-  return admin.firestore().collection("users").doc(user.uid).set({
+  const userData: UserData = {
     email: user.email,
     role: "passenger",
-    recentLocations: [],
     displayName: user.displayName,
-  });
-});
+  };
 
+  return admin.firestore().collection("users").doc(user.uid).set(userData);
+});
 
 export const updateUserInfo = onRequest(async (req, res) => {
   const { displayName, uid } = req.body;
