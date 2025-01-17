@@ -1,11 +1,11 @@
 import React from "react";
 
-import { View, Text, TextInput, StyleSheet, Pressable } from "react-native";
+import { View, Text, TextInput, StyleSheet, Pressable, ActivityIndicator } from "react-native";
 
 import { Image } from "expo-image";
 import * as Location from "expo-location";
 
-import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gorhom/bottom-sheet";
+import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetScrollView, BottomSheetView } from "@gorhom/bottom-sheet";
 
 import { Ride } from "@/types";
 import { useDebounce } from "@/utils";
@@ -31,10 +31,10 @@ const BottomSheet = (): JSX.Element => {
   const { currentStation, setCurrentStation } = useStation();
   const { createRideMode, setCreateRideMode } = useCreateRide();
 
+  const [rides, setRides] = React.useState<Ride[]>([]);
   const [query, setQuery] = React.useState<string>("");
+  const [loading, setLoading] = React.useState<boolean>(false);
   const [searchResults, setSearchResults] = React.useState<Ride[]>([]);
-
-  const [rides, setRides] = React.useState<Ride[]>(Array.from({ length: 8 }));
 
   const debouncedQuery = useDebounce<string>(query, 100);
 
@@ -49,11 +49,13 @@ const BottomSheet = (): JSX.Element => {
   React.useEffect(() => {
     (async () => {
       if (currentStation) {
+        setLoading(true);
         const rides = await getRidesStartingAtStation(currentStation.id);
         setRides(rides);
+        setLoading(false);
       }
     })();
-  }, []);
+  }, [currentStation]);
 
   React.useEffect(() => {
     (async () => {
@@ -66,7 +68,6 @@ const BottomSheet = (): JSX.Element => {
   React.useEffect(() => {
     (async () => {
       if (currentStation) return;
-
       const currentLocation = await Location.getCurrentPositionAsync();
 
       if (!currentLocation) return;
@@ -102,7 +103,7 @@ const BottomSheet = (): JSX.Element => {
       enablePanDownToClose={false}
       backgroundComponent={props => <BottomSheetBackground {...props} />}
     >
-      <BottomSheetView style={styles.container}>
+      <BottomSheetScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.currentStation}>
           {currentStation ? (
             <Text style={textStyles.currentStationText}>{currentStation.name}</Text>
@@ -159,6 +160,16 @@ const BottomSheet = (): JSX.Element => {
 
         <View style={{ gap: 10, paddingHorizontal: 16 }}>
           <Text style={textStyles.nearbyRidesText}>Nearby Rides</Text>
+
+          {(loading) && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator
+                size="large"
+                color="black"
+              />
+            </View>
+          )}
+
           {searchResults.map((ride, index) => (
             <RideItem
               key={index}
@@ -167,7 +178,7 @@ const BottomSheet = (): JSX.Element => {
             />
           ))}
 
-          {!searchResults && rides.map((ride, index) => (
+          {(searchResults.length == 0) && rides.map((ride, index) => (
             <RideItem
               key={index}
               ride={ride}
@@ -175,7 +186,7 @@ const BottomSheet = (): JSX.Element => {
             />
           ))}
         </View>
-      </BottomSheetView>
+      </BottomSheetScrollView>
     </RNBottomSheet>
   );
 };
@@ -197,6 +208,8 @@ interface RideItemProps {
 }
 
 const RideItem = ({ ride, onPress }: RideItemProps): JSX.Element => {
+  const formattedPrice = ride.price.toLocaleString("en-NG", { style: "currency", currency: "NGN" });
+
   return (
     <Pressable onPress={onPress} style={{ minHeight: 60, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
       <View style={{ padding: 12 }}>
@@ -207,11 +220,11 @@ const RideItem = ({ ride, onPress }: RideItemProps): JSX.Element => {
       </View>
       <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", borderBottomWidth: 1, borderColor: "hsl(0, 0%, 90%)" }}>
         <View style={{ flex: 1, gap: 1.5, width: "100%" }}>
-          <Text style={textStyles.rideItemTitle}>PO124AC</Text>
+          <Text style={textStyles.rideItemTitle}>{ride.id}</Text>
           <View style={{ flexDirection: "row", gap: 6 }}>
-            <Text style={[textStyles.rideItemSubtitle, { fontFamily: "DMSans-SemiBold" }]}>₦500</Text>
+            <Text style={[textStyles.rideItemSubtitle, { fontFamily: "DMSans-SemiBold" }]}>{formattedPrice}</Text>
             <Text style={textStyles.rideItemSubtitle}>•</Text>
-            <Text style={textStyles.rideItemSubtitle}>Lekki Phase One</Text>
+            <Text style={textStyles.rideItemSubtitle}>{ride.itenary.end.name}</Text>
           </View>
         </View>
         <View style={{ padding: 12 }}>
@@ -267,6 +280,12 @@ const textStyles = StyleSheet.create({
 const styles = StyleSheet.create({
   container: {
     gap: 6,
+  },
+  loadingContainer: {
+    height: 200,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
   currentStation: {
     paddingVertical: 8,
