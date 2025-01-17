@@ -5,10 +5,9 @@ import { View, StyleSheet } from "react-native";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import RNBottomSheet, { BottomSheetBackgroundProps } from "@gorhom/bottom-sheet";
 
-import { useRide } from "@/context/ride";
-import { useInfo } from "@/context/info";
+
 import { createRide } from "@/services/rides";
-import { useCreateRide } from "@/context/createRide";
+import { useAppContext } from "@/context/AppContext";
 
 import Header from "./Header";
 import Finish from "./Finish";
@@ -27,9 +26,9 @@ const CreateRide = (): JSX.Element => {
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const [loading, setLoading] = React.useState<boolean>(false);
 
-  const { setInfo } = useInfo();
-  const { setPendingRide } = useRide();
-  const { createRideMode, selectedRoute, setCreateRideMode } = useCreateRide();
+  const { setInfo } = useAppContext();
+  const { setPendingRide } = useAppContext();
+  const { createRideMode, selectedRoute, setCreateRideMode } = useAppContext();
 
   const [price, setPrice] = React.useState<string>("");
   const [step, setStep] = React.useState<Step>(Step.SelectRoute);

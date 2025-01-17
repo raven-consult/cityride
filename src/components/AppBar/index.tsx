@@ -8,14 +8,14 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
-import { useRide } from "@/context/ride";
+import { useAppContext } from "@/context/AppContext";
 
 import BellIcon from "@/assets/icons/bell.svg";
 
 
 const AppBar = (): JSX.Element => {
   const router = useRouter();
-  const { pendingRide } = useRide();
+  const { pendingRide } = useAppContext();
 
   const [currentUser, setCurrentUser] = React.useState<FirebaseAuthTypes.User | null>(null);
 

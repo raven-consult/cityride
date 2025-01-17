@@ -1,34 +1,21 @@
 import React from "react";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import { Ride } from "@/types";
 
-interface RideContext {
+
+export interface RideContextType {
   ride: Ride | null;
+  setCurrentRide: React.Dispatch<React.SetStateAction<Ride | null>>;
   pendingRide: Ride | null;
-  setPendingRide: (ride: Ride | null) => void;
-  setCurrentRide: (ride: Ride | null) => void;
+  setPendingRide: React.Dispatch<React.SetStateAction<Ride | null>>;
 }
 
-
-const RideContext = React.createContext<RideContext>({} as RideContext);
-
-
-export const useRide = () => React.useContext(RideContext);
-
-
-interface RideProviderProps {
-  children: React.ReactNode;
-}
-
-const RideProvider = ({ children }: RideProviderProps): JSX.Element => {
-  const [ride, setRide] = React.useState<Ride | null>(null);
+export const useRideState = (): RideContextType => {
+  const [ride, setCurrentRide] = React.useState<Ride | null>(null);
   const [pendingRide, setPendingRide] = React.useState<Ride | null>(null);
 
   const pendingRideKey = "pendingRide";
-
-  const setCurrentRide = (ride: Ride | null) => setRide(ride);
 
   React.useEffect(() => {
     (async () => {
@@ -40,30 +27,10 @@ const RideProvider = ({ children }: RideProviderProps): JSX.Element => {
     })();
   }, [pendingRide]);
 
-  return (
-    <RideContext.Provider value={{
-      ride,
-      setCurrentRide,
-
-      pendingRide,
-      setPendingRide,
-    }}>
-      {children}
-    </RideContext.Provider>
-  );
-};
-
-export const useRideState = () => {
-  const context = React.useContext(RideContext);
-  if (!context) {
-    throw new Error("useRideState must be used within a RideProvider");
-  }
   return {
-    ride: context.ride,
-    setRide: context.setCurrentRide,
-    pendingRide: context.pendingRide,
-    setPendingRide: context.setPendingRide,
+    ride,
+    setCurrentRide,
+    pendingRide,
+    setPendingRide,
   };
 };
-
-export default RideProvider;

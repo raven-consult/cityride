@@ -5,20 +5,18 @@ import { Dropdown } from "react-native-element-dropdown";
 import GoogleMapView, { PROVIDER_GOOGLE, Marker as RNMarker } from "react-native-maps";
 
 import { Station } from "@/types";
-import { useStation } from "@/context/station";
 import { TextButton } from "@/design/ui/Button";
 import { hasPlayServices } from "@/services/auth";
 import { getAllStations } from "@/services/stations";
-import { useCreateRide } from "@/context/createRide";
+import { useAppContext } from "@/context/AppContext";
 
 
 const MapView = (): JSX.Element => {
   const mapRef = React.useRef<GoogleMapView>(null);
   const [stations, setStations] = React.useState<Station[]>([]);
 
-  const { createRideMode, selectedRoute, setSelectedRoute } = useCreateRide();
-
-  const { setCurrentStation } = useStation();
+  const { setCurrentStation } = useAppContext();
+  const { createRideMode, selectedRoute, setSelectedRoute } = useAppContext();
 
   const formatStations = React.useMemo(() => {
     return stations.map(station => ({
