@@ -14,7 +14,7 @@ const Index = () => {
   const router = useRouter();
 
   const signIn = React.useCallback(async () => {
-    if (await hasPlayServices()) {
+    if (hasPlayServices()) {
       await signInWithGoogle();
     } else {
       await signInAsFakeUser();
