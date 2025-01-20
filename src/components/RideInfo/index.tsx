@@ -1,20 +1,21 @@
 import React from "react";
 
-import { View, Text, StyleSheet, Pressable } from "react-native";
-
-import { Image } from "expo-image";
+import { View, Text, StyleSheet } from "react-native";
 
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gorhom/bottom-sheet";
 
 import { Info } from "@/types";
-import CloseIcon from "@/assets/icons/close.svg";
-import { useAppContext } from "@/context/AppContext";
 import { boardRide } from "@/services/rides";
+import { useAppContext } from "@/context/AppContext";
+
+import DriverBottomBar from "./_components/DriverBotttomBar";
+import PassengerBottomBar from "./_components/PassengerBotttomBar";
 
 
 const RideInfo = (): JSX.Element => {
   const { setInfo } = useAppContext();
+  const { pendingRide } = useAppContext();
   const { ride, setCurrentRide } = useAppContext();
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const snapPoints = React.useMemo(() => ["15%", "30%"], []);
@@ -40,12 +41,20 @@ const RideInfo = (): JSX.Element => {
   const clearRide = () => setCurrentRide(null);
 
   const onPressBoardRide = async () => {
-    if(!ride || !currentUser) return;
+    if (!ride || !currentUser) return;
 
     await boardRide(ride.id, currentUser.uid);
     clearRide();
     setInfo({} as Info);
   }
+
+  const isPendingRide = React.useMemo(() => {
+    return pendingRide?.id === ride?.id;
+  }, [ride, pendingRide]);
+
+  const userIsPassenger: boolean = React.useMemo(() => {
+    throw new Error("Not implemented");
+  }, []);
 
   const driverArrival = React.useMemo(() => {
     const arrival = ride?.metadata.driverArrival;
@@ -63,7 +72,8 @@ const RideInfo = (): JSX.Element => {
       ?.price
       .toLocaleString("en-NG", {
         style: "currency",
-        currency: "NGN" });
+        currency: "NGN"
+      });
   }, [ride]);
 
   const maxPassengers = React.useMemo(() => {
@@ -101,64 +111,18 @@ const RideInfo = (): JSX.Element => {
           </View>
         </View>
 
-        <View style={styles.ctaSection}>
-          <Pressable onPress={clearRide} style={{ borderRadius: 8, padding: 8, borderWidth: 1, borderColor: "black" }}>
-            <Image
-              source={CloseIcon}
-              style={{
-                width: 38,
-                height: 38,
-              }}
-            />
-          </Pressable>
-          <Pressable
-            onPress={onPressBoardRide}
-            style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
-            <Text style={textStyles.boardRideText}>Board Ride</Text>
-          </Pressable>
-        </View>
-        <View style={styles.ctaSection}>
-          <Pressable onPress={clearRide} style={{ borderRadius: 8, padding: 8, borderWidth: 1, borderColor: "black" }}>
-            <Image
-              source={CloseIcon}
-              style={{
-                width: 38,
-                height: 38,
-              }}
-            />
-          </Pressable>
-          <Pressable
-            // onPress={boardRide}
-            style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
-            <Text style={textStyles.boardRideText}>View Ticket</Text>
-          </Pressable>
-          <Pressable
-            // onPress={boardRide}
-            style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
-            <Text style={textStyles.boardRideText}>Cancel Ride</Text>
-          </Pressable>
-        </View>
-        <View style={styles.ctaSection}>
-          <Pressable onPress={clearRide} style={{ borderRadius: 8, padding: 8, borderWidth: 1, borderColor: "black" }}>
-            <Image
-              source={CloseIcon}
-              style={{
-                width: 38,
-                height: 38,
-              }}
-            />
-          </Pressable>
-          <Pressable
-            // onPress={boardRide}
-            style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
-            <Text style={textStyles.boardRideText}>Scan QR Code</Text>
-          </Pressable>
-          <Pressable
-            // onPress={boardRide}
-            style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
-            <Text style={textStyles.boardRideText}>Cancel Ride</Text>
-          </Pressable>
-        </View>
+        {userIsPassenger ? (
+          <PassengerBottomBar
+            clearRide={clearRide}
+            isPendingRide={isPendingRide}
+            onPressBoardRide={onPressBoardRide}
+          />
+        ) : (
+          <DriverBottomBar
+            clearRide={clearRide}
+            isPendingRide={isPendingRide}
+          />
+        )}
       </BottomSheetView>
     </RNBottomSheet>
   );
