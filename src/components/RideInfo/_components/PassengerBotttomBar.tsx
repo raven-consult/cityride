@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, Text, View, StyleSheet } from "react-native";
+import { Pressable, ActivityIndicator, Text, View, StyleSheet } from "react-native";
 
 import { Image } from "expo-image";
 
@@ -7,12 +7,19 @@ import CloseIcon from "@/assets/icons/close.svg";
 
 
 interface PassengerBottomBarProps {
-  isPendingRide: boolean;
   clearRide: () => void;
-  onPressBoardRide: () => void;
+  isPendingRide: boolean;
+  onPressBoardRide: () => Promise<void>;
 }
 
 const PassengerBottomBar = ({ isPendingRide, clearRide, onPressBoardRide }: PassengerBottomBarProps): JSX.Element => {
+  const [loading, setLoading] = React.useState<string>("");
+
+  const _onPressBoardRide = async () => {
+    setLoading("boardRide");
+    await onPressBoardRide();
+    setLoading("");
+  };
 
   return (
     <View style={styles.ctaSection}>
@@ -41,9 +48,13 @@ const PassengerBottomBar = ({ isPendingRide, clearRide, onPressBoardRide }: Pass
         </>
       ) : (
         <Pressable
-          onPress={onPressBoardRide}
+          onPress={_onPressBoardRide}
           style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
-          <Text style={textStyles.boardRideText}>Board Ride</Text>
+          {loading === "boardRide" ? (
+            <ActivityIndicator color="black" />
+          ) : (
+            <Text style={textStyles.boardRideText}>Board Ride</Text>
+          )}
         </Pressable>
       )}
     </View>
