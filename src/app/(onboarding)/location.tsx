@@ -17,7 +17,7 @@ const RequestLocation = (): JSX.Element => {
     let { status } = await Location.requestForegroundPermissionsAsync();
 
     if( status === Location.PermissionStatus.GRANTED) {
-      router.push("/(onboarding)/fund-wallet");
+      router.replace("/(onboarding)/fund-wallet");
     } else if (status !== Location.PermissionStatus.DENIED) {
       Alert.alert(
         "Location Permission",

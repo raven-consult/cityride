@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Text, View, StyleSheet, Pressable } from "react-native";
+import { Text, View, StyleSheet, Pressable, StatusBar } from "react-native";
 
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -24,6 +24,7 @@ const Index = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar translucent />
       <Image
         source={SplashScreenPng}
         style={{

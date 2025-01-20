@@ -9,10 +9,8 @@ import ExtendedAppBar from "@/components/ExtendedAppBar";
 const Layout = (): JSX.Element => {
   return (
     <Stack screenOptions={{
-      contentStyle: {
-        backgroundColor: "white",
-      },
-      statusBarStyle: "dark",
+      statusBarTranslucent: true,
+      contentStyle: { backgroundColor: "white" },
     }}>
       <Stack.Screen
         name="index"
@@ -54,7 +52,7 @@ const Layout = (): JSX.Element => {
         }}
       />
     </Stack>
-  )
+  );
 };
 
 
