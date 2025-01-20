@@ -42,8 +42,8 @@ export const sendNotificationOnTransaction = onDocumentCreated("transactions/{tr
 
   const message = {
     sound: "default",
-    title: "Transaction Notification",
     to: senderNotificationTokenData,
+    title: "Transaction Notification",
     body: `You just paid ${amount} to a customer`,
   } as ExpoPushMessage;
 
