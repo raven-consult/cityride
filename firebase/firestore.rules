@@ -7,6 +7,16 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /wallets/{docId} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    match /transactions/{docId} {
+      allow read: if false;
+      allow write: if false;
+    }
+
     match /users/{docId} {
       allow read: if isDocOwner(docId);
       allow write: if isDocOwner(docId);
