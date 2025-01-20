@@ -19,7 +19,7 @@ const PassengerBottomBar = ({ isPendingRide, clearRide, onPressBoardRide }: Pass
     setLoading("boardRide");
     await onPressBoardRide();
     setLoading("");
-  };
+  }
 
   return (
     <View style={styles.ctaSection}>
@@ -51,7 +51,7 @@ const PassengerBottomBar = ({ isPendingRide, clearRide, onPressBoardRide }: Pass
           onPress={_onPressBoardRide}
           style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
           {loading === "boardRide" ? (
-            <ActivityIndicator color="black" />
+            <ActivityIndicator color="white" />
           ) : (
             <Text style={textStyles.boardRideText}>Board Ride</Text>
           )}

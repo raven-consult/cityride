@@ -116,11 +116,13 @@ export const getAvailableRides = onRequest(async (req, res) => {
   res.status(200).send(availableRides);
 });
 
-function checkRideIsFull(ride: Ride, passengers: Passengers) {
+function checkRideIsFull(ride: Ride, passengers: Passengers | undefined) {
+  if (!passengers) return false;
   return ride.metadata.maxPassengers === Object.keys(passengers).length;
 }
 
-function checkUserNotInRide(passengers: Passengers, userId: string) {
+function checkUserNotInRide(passengers: Passengers | undefined, userId: string) {
+  if (!passengers) return false;
   return !Object.keys(passengers).includes(userId);
 }
 
@@ -129,7 +131,8 @@ function checkUserHasNoPendingRide(userId: string): boolean {
 }
 
 function checkUserHasEnoughBalance(userId: string): boolean {
-  throw new Error("Not implemented");
+  return true;
+  // throw new Error("Not implemented");
 }
 
 /**
@@ -162,7 +165,7 @@ export const boardRide = onRequest(async (req, res) => {
   }
 
   const isUserInRide = checkUserNotInRide(passengers, passengerId);
-  if (!isUserInRide) {
+  if (isUserInRide) {
     res.status(400).send("User is already in the ride");
     return;
   }
@@ -332,8 +335,13 @@ export const userIsPassengerOfRide = onRequest(async (req, res) => {
 
   const rideRtdbRef = admin.database().ref(`/rides/${rideId}`);
 
-  const passengers = (await rideRtdbRef.child("passengers").get()).toJSON() as Passengers;
-  const isPassenger = Object.keys(passengers).includes(userId);
+  const passengers = await rideRtdbRef.child("passengers").get();
+
+  let isPassenger = false;
+
+  if (passengers.exists()) {
+    isPassenger = Object.keys(passengers).includes(userId);
+  }
 
   res.status(200).send({ isPassenger });
 });

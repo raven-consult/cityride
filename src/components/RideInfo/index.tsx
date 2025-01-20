@@ -22,7 +22,7 @@ const RideInfo = (): JSX.Element => {
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const snapPoints = React.useMemo(() => ["15%", "30%"], []);
 
-  const [userIsPassenger, setUserIsPassenger] = React.useState<boolean | null>(null);
+  // const [userIsDriver, setUserIsDriver] = React.useState<boolean | null>(null);
   const [currentUser, setCurrentUser] = React.useState<FirebaseAuthTypes.User | null>(null);
 
   React.useEffect(() => {
@@ -33,11 +33,8 @@ const RideInfo = (): JSX.Element => {
     return sub;
   }, []);
 
-  React.useEffect(() => {
-    (async () => {
-      if (!ride || !currentUser) return false;
-      setUserIsPassenger(await userIsPassengerOfRide(ride.id, currentUser.uid));
-    })();
+  const userIsDriver = React.useMemo(() => {
+    return ride?.metadata.driverId == currentUser?.uid;
   }, [ride, currentUser]);
 
   React.useEffect(() => {
@@ -53,16 +50,19 @@ const RideInfo = (): JSX.Element => {
   const onPressBoardRide = async () => {
     if (!ride || !currentUser) return;
 
-    await boardRide(ride.id, currentUser.uid);
-    setPendingRide(ride);
-
-    clearRide();
-
-    setInfo({
-      title: "Ride Boarded",
-      illustration: RoadPathImg,
-      description: "Your ride has been scheduled. You will be notified when your arrived has arrived.",
-    } as Info);
+    try {
+      await boardRide(ride.id, currentUser.uid);
+      setPendingRide(ride);
+      setCurrentRide(null);
+      setInfo({
+        title: "Ride Boarded",
+        illustration: RoadPathImg,
+        description: "Your ride has been scheduled. You will be notified when your arrived has arrived.",
+      } as Info);
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
   }
 
   const isPendingRide = React.useMemo(() => {
@@ -124,16 +124,16 @@ const RideInfo = (): JSX.Element => {
           </View>
         </View>
 
-        {(userIsPassenger != null && userIsPassenger) ? (
+        {userIsDriver ? (
+          <DriverBottomBar
+            clearRide={clearRide}
+            isPendingRide={isPendingRide}
+          />
+        ) : (
           <PassengerBottomBar
             clearRide={clearRide}
             isPendingRide={isPendingRide}
             onPressBoardRide={onPressBoardRide}
-          />
-        ) : (
-          <DriverBottomBar
-            clearRide={clearRide}
-            isPendingRide={isPendingRide}
           />
         )}
       </BottomSheetView>
@@ -182,6 +182,7 @@ const textStyles = StyleSheet.create({
 const styles = StyleSheet.create({
   container: {
     gap: 8,
+    paddingBottom: 8,
     borderTopWidth: 1,
     borderColor: "hsl(0, 0%, 90%)",
   },

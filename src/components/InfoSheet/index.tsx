@@ -93,6 +93,7 @@ const textStyles = StyleSheet.create({
 const styles = StyleSheet.create({
   container: {
     gap: 8,
+    paddingBottom: 8,
     borderTopWidth: 1,
     borderColor: "hsl(0, 0%, 90%)",
   },

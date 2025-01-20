@@ -19,6 +19,7 @@ export const userIsPassengerOfRide = async (rideId: string, userId: string): Pro
 
   if (!res.ok) {
     const text = await res.text();
+    console.log("Error", text);
     throw new Error(text);
   }
 
@@ -99,8 +100,10 @@ export const boardRide = async (rideId: string, passengerId: string) => {
 
   if (!res.ok) {
     const text = await res.text();
+    console.log("Error", text);
     throw new Error(text);
   }
 
-  return res.json();
+  const data = await res.text();
+  return data;
 } 
