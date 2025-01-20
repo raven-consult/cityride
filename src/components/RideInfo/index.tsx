@@ -69,6 +69,10 @@ const RideInfo = (): JSX.Element => {
     return pendingRide?.id === ride?.id;
   }, [ride, pendingRide]);
 
+  const hasPendingRide = React.useMemo(() => {
+    return !!pendingRide;
+  }, [pendingRide]);
+
   const driverArrival = React.useMemo(() => {
     const arrival = ride?.metadata.driverArrival;
     return `${arrival} mins`;
@@ -133,6 +137,7 @@ const RideInfo = (): JSX.Element => {
           <PassengerBottomBar
             clearRide={clearRide}
             isPendingRide={isPendingRide}
+            hasPendingRide={hasPendingRide}
             onPressBoardRide={onPressBoardRide}
           />
         )}
