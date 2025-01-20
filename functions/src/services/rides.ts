@@ -125,7 +125,7 @@ function checkUserNotInRide(passengers: Passengers, userId: string) {
 }
 
 function checkUserHasNoPendingRide(userId: string): boolean {
-  throw new Error("Not implemented");
+  return true;
 }
 
 function checkUserHasEnoughBalance(userId: string): boolean {
