@@ -12,11 +12,13 @@ import { useAppContext } from "@/context/AppContext";
 import DriverBottomBar from "./_components/DriverBotttomBar";
 import PassengerBottomBar from "./_components/PassengerBotttomBar";
 
+import RoadPathImg from "@/assets/images/static/road-path.svg";
+
 
 const RideInfo = (): JSX.Element => {
   const { setInfo } = useAppContext();
-  const { pendingRide } = useAppContext();
   const { ride, setCurrentRide } = useAppContext();
+  const { pendingRide, setPendingRide } = useAppContext();
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const snapPoints = React.useMemo(() => ["15%", "30%"], []);
 
@@ -44,8 +46,15 @@ const RideInfo = (): JSX.Element => {
     if (!ride || !currentUser) return;
 
     await boardRide(ride.id, currentUser.uid);
+    setPendingRide(ride);
+
     clearRide();
-    setInfo({} as Info);
+
+    setInfo({
+      title: "Ride Boarded",
+      illustration: RoadPathImg,
+      description: "Your ride has been scheduled. You will be notified when your arrived has arrived.",
+    } as Info);
   }
 
   const isPendingRide = React.useMemo(() => {
