@@ -7,17 +7,15 @@ import auth from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
 import firestore from "@react-native-firebase/firestore";
 import analytics from "@react-native-firebase/analytics";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
-import AppContextProvider from "@/context/AppContext";
-import RideInfo from "@/components/RideInfo";
 import useDMSans from "@/design/fonts/DM_Sans";
-import InfoSheet from "@/components/InfoSheet";
-import CreateRide from "@/components/CreateRide";
+
 
 SplashScreen.preventAutoHideAsync();
+
 
 const RootLayout = (): JSX.Element => {
   const [loaded] = useDMSans();
@@ -53,19 +51,14 @@ const RootLayout = (): JSX.Element => {
 
   return (
     <GestureHandlerRootView>
-      <AppContextProvider>
-        <Stack screenOptions={{
-          animation: "fade",
-          headerShown: false,
-          contentStyle: { backgroundColor: "white" },
-        }}>
-          <Stack.Screen name="(app)" />
-          <Stack.Screen name="(onboarding)" />
-        </Stack>
-        <RideInfo />
-        <InfoSheet />
-        <CreateRide />
-      </AppContextProvider>
+      <Stack screenOptions={{
+        animation: "fade",
+        headerShown: false,
+        contentStyle: { backgroundColor: "white" },
+      }}>
+        <Stack.Screen name="(app)" />
+        <Stack.Screen name="(onboarding)" />
+      </Stack>
     </GestureHandlerRootView>
   );
 };
