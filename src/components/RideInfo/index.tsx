@@ -6,8 +6,8 @@ import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gorhom/bottom-sheet";
 
 import { Info } from "@/types";
-import { boardRide } from "@/services/rides";
 import { useAppContext } from "@/context/AppContext";
+import { boardRide, userIsPassengerOfRide } from "@/services/rides";
 
 import DriverBottomBar from "./_components/DriverBotttomBar";
 import PassengerBottomBar from "./_components/PassengerBotttomBar";
@@ -22,6 +22,7 @@ const RideInfo = (): JSX.Element => {
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const snapPoints = React.useMemo(() => ["15%", "30%"], []);
 
+  const [userIsPassenger, setUserIsPassenger] = React.useState<boolean | null>(null);
   const [currentUser, setCurrentUser] = React.useState<FirebaseAuthTypes.User | null>(null);
 
   React.useEffect(() => {
@@ -31,6 +32,13 @@ const RideInfo = (): JSX.Element => {
 
     return sub;
   }, []);
+
+  React.useEffect(() => {
+    (async () => {
+      if (!ride || !currentUser) return false;
+      setUserIsPassenger(await userIsPassengerOfRide(ride.id, currentUser.uid));
+    })();
+  }, [ride, currentUser]);
 
   React.useEffect(() => {
     if (ride) {
@@ -60,10 +68,6 @@ const RideInfo = (): JSX.Element => {
   const isPendingRide = React.useMemo(() => {
     return pendingRide?.id === ride?.id;
   }, [ride, pendingRide]);
-
-  const userIsPassenger: boolean = React.useMemo(() => {
-    throw new Error("Not implemented");
-  }, []);
 
   const driverArrival = React.useMemo(() => {
     const arrival = ride?.metadata.driverArrival;
@@ -120,7 +124,7 @@ const RideInfo = (): JSX.Element => {
           </View>
         </View>
 
-        {userIsPassenger ? (
+        {(userIsPassenger != null && userIsPassenger) ? (
           <PassengerBottomBar
             clearRide={clearRide}
             isPendingRide={isPendingRide}

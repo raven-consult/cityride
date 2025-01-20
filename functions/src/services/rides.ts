@@ -325,6 +325,20 @@ export const confirmPassenger = onRequest(async (req, res) => {
 });
 
 
+export const userIsPassengerOfRide = onRequest(async (req, res) => {
+  if (!isAuthorized(req, res)) return;
+
+  const { rideId, userId } = req.body;
+
+  const rideRtdbRef = admin.database().ref(`/rides/${rideId}`);
+
+  const passengers = (await rideRtdbRef.child("passengers").get()).toJSON() as Passengers;
+  const isPassenger = Object.keys(passengers).includes(userId);
+
+  res.status(200).send({ isPassenger });
+});
+
+
 // TODO: Add comemnts
 export const sendArrivalNotification = onRequest(async (req, res) => {
   if (!isAuthorized(req, res)) return;
