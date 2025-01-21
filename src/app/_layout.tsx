@@ -12,6 +12,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 import useDMSans from "@/design/fonts/DM_Sans";
+import AppContextProvider from "@/context/AppContext";
 
 
 SplashScreen.preventAutoHideAsync();
@@ -51,30 +52,32 @@ const RootLayout = (): JSX.Element => {
 
   return (
     <GestureHandlerRootView>
-      <Stack
-        screenOptions={{
-          animation: "fade",
-          headerShown: false,
-          contentStyle: {
-            backgroundColor: "white"
-          },
-        }}
-      >
-        <Stack.Screen
-          name="(app)"
-          options={{
-            statusBarStyle: "dark",
-            statusBarTranslucent: true,
+      <AppContextProvider>
+        <Stack
+          screenOptions={{
+            animation: "fade",
+            headerShown: false,
+            contentStyle: {
+              backgroundColor: "white"
+            },
           }}
-        />
-        <Stack.Screen
-          name="(onboarding)"
-          options={{
-            statusBarStyle: "dark",
-            statusBarTranslucent: true,
-          }}
-        />
-      </Stack>
+        >
+          <Stack.Screen
+            name="(app)"
+            options={{
+              statusBarStyle: "dark",
+              statusBarTranslucent: true,
+            }}
+          />
+          <Stack.Screen
+            name="(onboarding)"
+            options={{
+              statusBarStyle: "dark",
+              statusBarTranslucent: true,
+            }}
+          />
+        </Stack>
+      </AppContextProvider>
     </GestureHandlerRootView>
   );
 };

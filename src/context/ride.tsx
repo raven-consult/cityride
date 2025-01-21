@@ -19,6 +19,15 @@ export const useRideState = (): RideContextType => {
 
   React.useEffect(() => {
     (async () => {
+      const pendingRide = await AsyncStorage.getItem(pendingRideKey);
+      if (pendingRide) {
+        setPendingRide(JSON.parse(pendingRide));
+      }
+    })();
+  }, []);
+
+  React.useEffect(() => {
+    (async () => {
       if (pendingRide == null) {
         await AsyncStorage.removeItem(pendingRideKey);
       } else {
