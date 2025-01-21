@@ -228,6 +228,67 @@ export const boardRide = onRequest(async (req, res) => {
   res.status(200).send(passengerCode);
 });
 
+
+export const passengerCancelRide = onRequest(async (req, res) => {
+  if(!await isAuthorized(req, res)) return;
+
+  const { rideId, passengerId } = req.body;
+
+  const passengersRef = admin.database().ref(`/rides/${rideId}/passengers`);
+  const passengersData = await passengersRef.get();
+
+  if (!passengersData.exists()) {
+    res.status(400).send("No passengers yet registered");
+    return;
+  }
+
+  const passengers = passengersData.toJSON() as Passengers;
+  if (!passengers) {
+    res.status(400).send("No passengers yet registered");
+    return;
+  }
+
+  if (!Object.keys(passengers).includes(passengerId)) {
+    res.status(400).send("Passenger not found");
+    return;
+  }
+
+  await passengersRef.child(`${passengerId}`).remove();
+
+  // Notify driver
+  const rideRef = await database.collection("rides").doc(rideId).get();
+  const ride = { ...rideRef.data(), id: rideRef.id } as Ride;
+
+  const driverNotificationToken = await admin
+    .database()
+    .ref(`/users/${ride.metadata.driverId}/notificationToken`)
+    .get();
+
+  if (!driverNotificationToken.exists) {
+    logger.error(`Could not send notification to driver: ${ride.metadata.driverId} of ride: ${ride.id} because notification token does not exist`);
+  }
+
+  const notificationToken = driverNotificationToken.val();
+  if (!Expo.isExpoPushToken(notificationToken)) {
+    logger.error(`Could not send notification to driver: ${ride.metadata.driverId} of ride: ${ride.id}`);
+  }
+
+  const message = {
+    sound: "default",
+    to: notificationToken,
+    title: "Passenger Cancelled",
+    body: "A passenger has cancelled the ride",
+  } as ExpoPushMessage;
+
+  try {
+    await expo.sendPushNotificationsAsync([message]);
+  } catch (error) {
+    logger.error(error);
+  }
+
+  res.status(200).send("Passenger removed");
+});
+
 // TODO: Add comments
 export const confirmPassenger = onRequest(async (req, res) => {
   if (!await isAuthorized(req, res)) return;

@@ -1,13 +1,13 @@
 import React from "react";
 
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
 
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gorhom/bottom-sheet";
 
 import { Info } from "@/types";
 import { useAppContext } from "@/context/AppContext";
-import { boardRide, userIsPassengerOfRide } from "@/services/rides";
+import { boardRide, passengerCancelRide } from "@/services/rides";
 
 import DriverBottomBar from "./_components/DriverBotttomBar";
 import PassengerBottomBar from "./_components/PassengerBotttomBar";
@@ -22,7 +22,6 @@ const RideInfo = (): JSX.Element => {
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const snapPoints = React.useMemo(() => ["15%", "30%"], []);
 
-  // const [userIsDriver, setUserIsDriver] = React.useState<boolean | null>(null);
   const [currentUser, setCurrentUser] = React.useState<FirebaseAuthTypes.User | null>(null);
 
   React.useEffect(() => {
@@ -63,7 +62,38 @@ const RideInfo = (): JSX.Element => {
       console.error(e);
       throw e;
     }
-  }
+  };
+
+  const onPressCancelRide = () => new Promise<void>((resolve) => {
+    if (!ride || !currentUser) return;
+    Alert.alert("Cancel Ride", "Are you sure you want to cancel this ride", [
+      {
+        text: "Cancel Ride",
+        onPress: async () => {
+          try {
+            await passengerCancelRide(ride.id, currentUser?.uid);
+            setPendingRide(null);
+            setCurrentRide(null);
+            setInfo({
+              title: "Ride Cancelled",
+              illustration: RoadPathImg,
+              description: "Your ride has been cancelled. The driver will be notified",
+            } as Info);
+            resolve();
+          } catch (e) {
+            console.error(e);
+            throw e;
+          }
+        },
+      },
+      {
+        text: "Cancel",
+        onPress: () => {
+          console.log("Dismissed");
+        }
+      }
+    ]);
+  });
 
   const isPendingRide = React.useMemo(() => {
     return pendingRide?.id === ride?.id;
@@ -139,6 +169,7 @@ const RideInfo = (): JSX.Element => {
             isPendingRide={isPendingRide}
             hasPendingRide={hasPendingRide}
             onPressBoardRide={onPressBoardRide}
+            onPressCancelRide={onPressCancelRide}
           />
         )}
       </BottomSheetView>
