@@ -11,14 +11,21 @@ interface PassengerBottomBarProps {
   isPendingRide: boolean;
   hasPendingRide: boolean;
   onPressBoardRide: () => Promise<void>;
+  onPressCancelRide: () => Promise<void>;
 }
 
-const PassengerBottomBar = ({ isPendingRide, hasPendingRide, clearRide, onPressBoardRide }: PassengerBottomBarProps): JSX.Element => {
+const PassengerBottomBar = ({ isPendingRide, hasPendingRide, clearRide, onPressBoardRide, onPressCancelRide }: PassengerBottomBarProps): JSX.Element => {
   const [loading, setLoading] = React.useState<string>("");
 
   const _onPressBoardRide = async () => {
     setLoading("boardRide");
     await onPressBoardRide();
+    setLoading("");
+  }
+
+  const _onPressCancelRide = async () => {
+    setLoading("cancelRide");
+    await onPressCancelRide();
     setLoading("");
   }
 
@@ -42,9 +49,13 @@ const PassengerBottomBar = ({ isPendingRide, hasPendingRide, clearRide, onPressB
             <Text style={textStyles.boardRideText}>View Ticket</Text>
           </Pressable>
           <Pressable
-            // onPress={boardRide}
+            onPress={_onPressCancelRide}
             style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
-            <Text style={textStyles.boardRideText}>Cancel Ride</Text>
+            {loading === "boardRide" ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text style={textStyles.boardRideText}>Cancel Ride</Text>
+            )}
           </Pressable>
         </>
       ) : (

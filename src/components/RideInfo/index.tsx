@@ -7,7 +7,7 @@ import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gor
 
 import { Info } from "@/types";
 import { useAppContext } from "@/context/AppContext";
-import { boardRide, userIsPassengerOfRide } from "@/services/rides";
+import { boardRide, passengerCancelRide } from "@/services/rides";
 
 import DriverBottomBar from "./_components/DriverBotttomBar";
 import PassengerBottomBar from "./_components/PassengerBotttomBar";
@@ -22,7 +22,6 @@ const RideInfo = (): JSX.Element => {
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const snapPoints = React.useMemo(() => ["15%", "30%"], []);
 
-  // const [userIsDriver, setUserIsDriver] = React.useState<boolean | null>(null);
   const [currentUser, setCurrentUser] = React.useState<FirebaseAuthTypes.User | null>(null);
 
   React.useEffect(() => {
@@ -58,6 +57,23 @@ const RideInfo = (): JSX.Element => {
         title: "Ride Boarded",
         illustration: RoadPathImg,
         description: "Your ride has been scheduled. You will be notified when your arrived has arrived.",
+      } as Info);
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
+  }
+
+  const onPressCancelRide = async () => {
+    if (!ride || !currentUser) return;
+    try {
+      await passengerCancelRide(ride.id, currentUser?.uid);
+      setPendingRide(null);
+      setCurrentRide(null);
+      setInfo({
+        title: "Ride Cancelled",
+        illustration: RoadPathImg,
+        description: "Your ride has been cancelled. The driver will be notified",
       } as Info);
     } catch (e) {
       console.error(e);
@@ -139,6 +155,7 @@ const RideInfo = (): JSX.Element => {
             isPendingRide={isPendingRide}
             hasPendingRide={hasPendingRide}
             onPressBoardRide={onPressBoardRide}
+            onPressCancelRide={onPressCancelRide}
           />
         )}
       </BottomSheetView>
