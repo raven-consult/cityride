@@ -53,7 +53,7 @@ const MapView = (): JSX.Element => {
           gap: 8,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "white",
+          backgroundColor: "hsl(0, 0%, 70%)",
         }
       ]}>
 

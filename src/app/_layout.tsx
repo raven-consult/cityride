@@ -51,13 +51,29 @@ const RootLayout = (): JSX.Element => {
 
   return (
     <GestureHandlerRootView>
-      <Stack screenOptions={{
-        animation: "fade",
-        headerShown: false,
-        contentStyle: { backgroundColor: "white" },
-      }}>
-        <Stack.Screen name="(app)" />
-        <Stack.Screen name="(onboarding)" />
+      <Stack
+        screenOptions={{
+          animation: "fade",
+          headerShown: false,
+          contentStyle: {
+            backgroundColor: "white"
+          },
+        }}
+      >
+        <Stack.Screen
+          name="(app)"
+          options={{
+            statusBarStyle: "dark",
+            statusBarTranslucent: true,
+          }}
+        />
+        <Stack.Screen
+          name="(onboarding)"
+          options={{
+            statusBarStyle: "dark",
+            statusBarTranslucent: true,
+          }}
+        />
       </Stack>
     </GestureHandlerRootView>
   );
