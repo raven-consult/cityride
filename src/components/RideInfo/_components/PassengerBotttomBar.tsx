@@ -10,10 +10,11 @@ interface PassengerBottomBarProps {
   clearRide: () => void;
   isPendingRide: boolean;
   hasPendingRide: boolean;
+  onPressViewTicket: () => void;
   onPressBoardRide: () => Promise<void>;
 }
 
-const PassengerBottomBar = ({ isPendingRide, hasPendingRide, clearRide, onPressBoardRide }: PassengerBottomBarProps): JSX.Element => {
+const PassengerBottomBar = ({ isPendingRide, hasPendingRide, clearRide, onPressViewTicket, onPressBoardRide }: PassengerBottomBarProps): JSX.Element => {
   const [loading, setLoading] = React.useState<string>("");
 
   const _onPressBoardRide = async () => {
@@ -37,7 +38,7 @@ const PassengerBottomBar = ({ isPendingRide, hasPendingRide, clearRide, onPressB
       {isPendingRide ? (
         <>
           <Pressable
-            // onPress={boardRide}
+            onPress={onPressViewTicket}
             style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
             <Text style={textStyles.boardRideText}>View Ticket</Text>
           </Pressable>

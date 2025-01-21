@@ -2,6 +2,8 @@ import React from "react";
 
 import { View, Text, StyleSheet } from "react-native";
 
+import { useRouter } from "expo-router";
+
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gorhom/bottom-sheet";
 
@@ -23,7 +25,6 @@ const RideInfo = (): JSX.Element => {
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const snapPoints = React.useMemo(() => ["15%", "30%"], []);
 
-  // const [userIsDriver, setUserIsDriver] = React.useState<boolean | null>(null);
   const [currentUser, setCurrentUser] = React.useState<FirebaseAuthTypes.User | null>(null);
 
   React.useEffect(() => {
@@ -65,6 +66,10 @@ const RideInfo = (): JSX.Element => {
       console.error(e);
       throw e;
     }
+  }
+
+  const onPressViewTicket = () => {
+    router.push("/(utils)/ride-ticket");
   }
 
   const isPendingRide = React.useMemo(() => {
@@ -141,6 +146,7 @@ const RideInfo = (): JSX.Element => {
             isPendingRide={isPendingRide}
             hasPendingRide={hasPendingRide}
             onPressBoardRide={onPressBoardRide}
+            onPressViewTicket={onPressViewTicket}
           />
         )}
       </BottomSheetView>
