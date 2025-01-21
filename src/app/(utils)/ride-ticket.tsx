@@ -1,42 +1,75 @@
 import React from "react";
 import { Text, View, StyleSheet, Pressable } from "react-native";
 
+import { router } from "expo-router";
 import { QrCodeSvg } from "react-native-qr-svg";
+import { useAppContext } from "@/context/AppContext";
 
 const FRAME_SIZE = 280;
 
 const RideTicket = (): JSX.Element => {
   const CONTENT = "Hello world";
 
+  const { pendingRide, rideCode } = useAppContext();
+  if (!pendingRide || !(rideCode || CONTENT)) return <></>;
+
+  const driverArrival = React.useMemo(() => {
+    const arrival = pendingRide?.metadata.driverArrival;
+    return `${arrival || 3} mins`;
+  }, [pendingRide]);
+
+  const itenary = React.useMemo(() => {
+    const end = pendingRide?.itenary.end.name;
+    const start = pendingRide?.itenary.start.name;
+    return `${start} → ${end}`;
+  }, [pendingRide]);
+
+  const price = React.useMemo(() => {
+    return pendingRide
+      ?.price
+      .toLocaleString("en-NG", {
+        style: "currency",
+        currency: "NGN",
+      });
+  }, [pendingRide]);
+
+  const onPressDone = () => {
+    router.back();
+  }
+
+  const maxPassengers = React.useMemo(() => {
+    return `${pendingRide?.metadata.maxPassengers || 3} seats`;
+  }, [pendingRide]);
+
   return (
     <View style={styles.container}>
       <View style={styles.ticketContainer}>
         <View style={styles.titleContainer}>
-          <Text style={textStyles.rideIdText}>PO124AC</Text>
-          <Text style={textStyles.rideItenaryText}>Iyana Oworo → Lekki Phase One</Text>
+          <Text style={textStyles.rideIdText}>{pendingRide.id}</Text>
+          <Text style={textStyles.rideItenaryText}>{itenary}</Text>
         </View>
         <View style={styles.rideDetailsContainer}>
           <View style={styles.rideDetails}>
-            <Text style={textStyles.rideDetailValue}>3 mins</Text>
+            <Text style={textStyles.rideDetailValue}>{driverArrival}</Text>
             <Text style={textStyles.rideDetailTitle}>Arriving in</Text>
           </View>
           <View style={styles.rideDetails}>
-            <Text style={textStyles.rideDetailValue}>₦500</Text>
+            <Text style={textStyles.rideDetailValue}>{price}</Text>
             <Text style={textStyles.rideDetailTitle}>Price</Text>
           </View>
           <View style={styles.rideDetails}>
-            <Text style={textStyles.rideDetailValue}>3 seats</Text>
+            <Text style={textStyles.rideDetailValue}>{maxPassengers}</Text>
             <Text style={textStyles.rideDetailTitle}>Passengers</Text>
           </View>
         </View>
 
         <QrCodeSvg
-          value={CONTENT}
+          value={rideCode || CONTENT}
           contentCells={5}
           style={styles.qr}
           frameSize={FRAME_SIZE}
           contentStyle={styles.box}
-          // content={<Text style={styles.icon}>👋</Text>}
+        // content={<Text style={styles.icon}>👋</Text>}
         />
       </View>
 
@@ -48,7 +81,9 @@ const RideTicket = (): JSX.Element => {
             borderRadius: 8,
             alignItems: "center",
             backgroundColor: "black"
-          }}>
+          }}
+          onPress={onPressDone}
+        >
           <Text style={textStyles.boardRideText}>Done</Text>
         </Pressable>
       </View>
@@ -72,7 +107,7 @@ const textStyles = StyleSheet.create({
     fontFamily: "DMSans-Regular",
   },
   rideDetailValue: {
-    fontSize: 18,
+    fontSize: 14,
     fontFamily: "DMSans-Bold",
     color: "hsl(0, 0%, 29%)",
   },
