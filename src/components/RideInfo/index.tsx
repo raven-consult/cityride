@@ -1,6 +1,6 @@
 import React from "react";
 
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
 
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gorhom/bottom-sheet";
@@ -46,23 +46,37 @@ const RideInfo = (): JSX.Element => {
 
   const clearRide = () => setCurrentRide(null);
 
-  const onPressBoardRide = async () => {
+  const onPressBoardRide = () => new Promise<void>((resolve) => {
     if (!ride || !currentUser) return;
 
-    try {
-      await boardRide(ride.id, currentUser.uid);
-      setPendingRide(ride);
-      setCurrentRide(null);
-      setInfo({
-        title: "Ride Boarded",
-        illustration: RoadPathImg,
-        description: "Your ride has been scheduled. You will be notified when your arrived has arrived.",
-      } as Info);
-    } catch (e) {
-      console.error(e);
-      throw e;
-    }
-  }
+    Alert.alert("Logout", "Are you sure you want to cancel this ride", [
+      {
+        text: "Cancel Ride",
+        onPress: async () => {
+          try {
+            await boardRide(ride.id, currentUser.uid);
+            setPendingRide(ride);
+            setCurrentRide(null);
+            setInfo({
+              title: "Ride Boarded",
+              illustration: RoadPathImg,
+              description: "Your ride has been scheduled. You will be notified when your arrived has arrived.",
+            } as Info);
+            resolve();
+          } catch (e) {
+            console.error(e);
+            throw e;
+          }
+        },
+      },
+      {
+        text: "Cancel",
+        onPress: () => {
+          console.log("Dismissed");
+        }
+      }
+    ]);
+  });
 
   const onPressCancelRide = async () => {
     if (!ride || !currentUser) return;
