@@ -64,7 +64,12 @@ export default () => {
             "backgroundColor": "#ffffff"
           }
         ],
-        "react-native-vision-camera",
+        [
+          "react-native-vision-camera",
+          {
+            "enableCodeScanner": true
+          }
+        ]
       ],
       "extra": {
         "eas": {
@@ -77,5 +82,4 @@ export default () => {
       }
     } satisfies ExpoConfig
   };
-
 }
