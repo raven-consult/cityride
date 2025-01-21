@@ -16,7 +16,8 @@ import RoadPathImg from "@/assets/images/static/road-path.svg";
 
 
 const RideInfo = (): JSX.Element => {
-  const { setInfo } = useAppContext();
+  const router = useRouter();
+  const { setInfo, setRideCode } = useAppContext();
   const { ride, setCurrentRide } = useAppContext();
   const { pendingRide, setPendingRide } = useAppContext();
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
@@ -51,7 +52,8 @@ const RideInfo = (): JSX.Element => {
     if (!ride || !currentUser) return;
 
     try {
-      await boardRide(ride.id, currentUser.uid);
+      const rideCode = await boardRide(ride.id, currentUser.uid);
+      setRideCode(rideCode);
       setPendingRide(ride);
       setCurrentRide(null);
       setInfo({

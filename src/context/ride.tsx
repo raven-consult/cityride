@@ -9,13 +9,36 @@ export interface RideContextType {
   setCurrentRide: React.Dispatch<React.SetStateAction<Ride | null>>;
   pendingRide: Ride | null;
   setPendingRide: React.Dispatch<React.SetStateAction<Ride | null>>;
+  rideCode: string | null;
+  setRideCode: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 export const useRideState = (): RideContextType => {
   const [ride, setCurrentRide] = React.useState<Ride | null>(null);
+  const [rideCode, setRideCode] = React.useState<string | null>(null);
   const [pendingRide, setPendingRide] = React.useState<Ride | null>(null);
 
+  const rideCodeKey = "rideCodeKey";
   const pendingRideKey = "pendingRide";
+
+  React.useEffect(() => {
+    (async () => {
+      const code = await AsyncStorage.getItem(rideCodeKey);
+      if (code) {
+        setRideCode(code);
+      }
+    })();
+  }, []);
+
+  React.useEffect(() => {
+    (async () => {
+      if (rideCode == null) {
+        await AsyncStorage.removeItem(rideCodeKey);
+      } else {
+        await AsyncStorage.setItem(rideCodeKey, rideCode);
+      }
+    })();
+  }, [rideCode]);
 
   React.useEffect(() => {
     (async () => {
@@ -41,5 +64,7 @@ export const useRideState = (): RideContextType => {
     setCurrentRide,
     pendingRide,
     setPendingRide,
+    rideCode,
+    setRideCode,
   };
 };
