@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from "react-native";
 
 import { Dropdown } from "react-native-element-dropdown";
-import GoogleMapView, { PROVIDER_GOOGLE, Marker as RNMarker } from "react-native-maps";
+import GoogleMapView, { Circle, Polyline, PROVIDER_GOOGLE, Marker as RNMarker } from "react-native-maps";
 
 import { Station } from "@/types";
 import { hasPlayServices } from "@/services/auth";
@@ -36,13 +36,50 @@ const MapView = (): JSX.Element => {
 
     if (!mapRef.current) return;
 
-    mapRef.current?.animateCamera({
-      center: {
-        latitude: station.coordinates.latitude,
-        longitude: station.coordinates.longitude
-      },
-      zoom: 16,
-    });
+    if (createRideMode) {
+      // Toogle Start
+      if (selectedRoute.start?.id === station.id) {
+        setSelectedRoute({
+          ...selectedRoute,
+          start: null,
+        });
+        setStations([...stations, station]);
+
+        // Toogle End
+      } else if (selectedRoute.end?.id === station.id) {
+        setSelectedRoute({
+          ...selectedRoute,
+          end: null,
+        });
+        setStations([...stations, station]);
+
+        // Select Start
+      } else if (selectedRoute.start == null) {
+        setSelectedRoute({
+          ...selectedRoute,
+          start: station,
+        });
+        const stationsWithoutStart = stations.filter(station => station.id !== selectedRoute.start?.id);
+        setStations(stationsWithoutStart);
+
+        // Select End
+      } else if (selectedRoute.end == null) {
+        setSelectedRoute({
+          ...selectedRoute,
+          end: station,
+        });
+        const stationsWithoutEnd = stations.filter(station => station.id !== selectedRoute.end?.id);
+        setStations(stationsWithoutEnd);
+      }
+    } else {
+      mapRef.current?.animateCamera({
+        center: {
+          latitude: station.coordinates.latitude,
+          longitude: station.coordinates.longitude
+        },
+        zoom: 16,
+      });
+    }
   }
 
   if (!hasPlayServices()) {
@@ -155,6 +192,38 @@ const MapView = (): JSX.Element => {
             }}
           />
         ))}
+        {selectedRoute.start !== null && (
+          <Circle
+            center={{
+              latitude: selectedRoute.start.coordinates.latitude,
+              longitude: selectedRoute.start.coordinates.longitude,
+            }}
+            radius={100}
+          />
+        )}
+        {selectedRoute.end !== null && (
+          <Circle
+            center={{
+              latitude: selectedRoute.end.coordinates.latitude,
+              longitude: selectedRoute.end.coordinates.longitude,
+            }}
+            radius={100}
+          />
+        )}
+        {selectedRoute.start !== null && selectedRoute.end !== null && (
+          <Polyline
+            coordinates={[
+              {
+                latitude: selectedRoute.start.coordinates.latitude,
+                longitude: selectedRoute.start.coordinates.longitude,
+              },
+              {
+                latitude: selectedRoute.end.coordinates.latitude,
+                longitude: selectedRoute.end.coordinates.longitude,
+              },
+            ]}
+          />
+        )}
       </GoogleMapView>
     );
   }
