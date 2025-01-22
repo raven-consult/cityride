@@ -7,11 +7,12 @@ import CloseIcon from "@/assets/icons/close.svg";
 
 
 interface DriverBottomBarProps {
-  isPendingRide: boolean;
   clearRide: () => void;
+  isPendingRide: boolean;
+  onPressScanQRCode: () => void;
 }
 
-const DriverBottomBar = ({ isPendingRide, clearRide }: DriverBottomBarProps): JSX.Element => {
+const DriverBottomBar = ({ isPendingRide, clearRide, onPressScanQRCode }: DriverBottomBarProps): JSX.Element => {
 
   return (
     <View style={styles.ctaSection}>
@@ -25,7 +26,7 @@ const DriverBottomBar = ({ isPendingRide, clearRide }: DriverBottomBarProps): JS
         />
       </Pressable>
       <Pressable
-        // onPress={boardRide}
+        onPress={onPressScanQRCode}
         style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
         <Text style={textStyles.boardRideText}>Scan QR Code</Text>
       </Pressable>

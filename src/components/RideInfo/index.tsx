@@ -103,6 +103,10 @@ const RideInfo = (): JSX.Element => {
     router.push("/(utils)/ride-ticket");
   }
 
+  const onPressScanQRCode = () => {
+    router.push("/(utils)/capture-qrcode");
+  }
+
   const isPendingRide = React.useMemo(() => {
     return pendingRide?.id === ride?.id;
   }, [ride, pendingRide]);
@@ -170,6 +174,7 @@ const RideInfo = (): JSX.Element => {
           <DriverBottomBar
             clearRide={clearRide}
             isPendingRide={isPendingRide}
+            onPressScanQRCode={onPressScanQRCode}
           />
         ) : (
           <PassengerBottomBar
