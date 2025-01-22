@@ -31,9 +31,30 @@ const MapView = (): JSX.Element => {
     })();
   }, []);
 
-  const onPressStation = (station: Station) => {
-    setCurrentStation(station);
 
+  React.useEffect(() => {
+    if (selectedRoute.start && selectedRoute.end) {
+      mapRef.current?.fitToCoordinates([
+        {
+          latitude: selectedRoute.start.coordinates.latitude,
+          longitude: selectedRoute.start.coordinates.longitude,
+        },
+        {
+          latitude: selectedRoute.end.coordinates.latitude,
+          longitude: selectedRoute.end.coordinates.longitude,
+        },
+      ], {
+        edgePadding: {
+          top: 150,
+          right: 100,
+          bottom: 100,
+          left: 150,
+        },
+      });
+    }
+  }, [selectedRoute])
+
+  const onPressStation = (station: Station) => {
     if (!mapRef.current) return;
 
     if (createRideMode) {
@@ -59,8 +80,6 @@ const MapView = (): JSX.Element => {
           ...selectedRoute,
           start: station,
         });
-        const stationsWithoutStart = stations.filter(station => station.id !== selectedRoute.start?.id);
-        setStations(stationsWithoutStart);
 
         // Select End
       } else if (selectedRoute.end == null) {
@@ -68,10 +87,10 @@ const MapView = (): JSX.Element => {
           ...selectedRoute,
           end: station,
         });
-        const stationsWithoutEnd = stations.filter(station => station.id !== selectedRoute.end?.id);
-        setStations(stationsWithoutEnd);
       }
     } else {
+      setCurrentStation(station);
+
       mapRef.current?.animateCamera({
         center: {
           latitude: station.coordinates.latitude,
@@ -174,13 +193,16 @@ const MapView = (): JSX.Element => {
         provider={PROVIDER_GOOGLE}
         // customMapStyle={mapStyling}
         showsMyLocationButton={false}
-        // googleMapId="b50315943f641580"
-        initialRegion={{
-          latitude: 6.5244,
-          longitude: 3.3792,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+        initialCamera={{
+          center: {
+            latitude: 6.5244,
+            longitude: 3.3792,
+          },
+          pitch: 0,
+          heading: 0,
+          zoom: 15,
         }}
+      // googleMapId="b50315943f641580"
       >
         {stations && stations.map((station, index) => (
           <RNMarker
@@ -192,26 +214,10 @@ const MapView = (): JSX.Element => {
             }}
           />
         ))}
-        {selectedRoute.start !== null && (
-          <Circle
-            center={{
-              latitude: selectedRoute.start.coordinates.latitude,
-              longitude: selectedRoute.start.coordinates.longitude,
-            }}
-            radius={100}
-          />
-        )}
-        {selectedRoute.end !== null && (
-          <Circle
-            center={{
-              latitude: selectedRoute.end.coordinates.latitude,
-              longitude: selectedRoute.end.coordinates.longitude,
-            }}
-            radius={100}
-          />
-        )}
-        {selectedRoute.start !== null && selectedRoute.end !== null && (
+        {(selectedRoute.start && selectedRoute.end) && (
           <Polyline
+            strokeWidth={4}
+            strokeColor="hsl(0, 0%, 30%)"
             coordinates={[
               {
                 latitude: selectedRoute.start.coordinates.latitude,
