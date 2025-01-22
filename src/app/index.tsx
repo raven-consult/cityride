@@ -1,11 +1,11 @@
 import React from "react";
 
-import {View, StyleSheet} from "react-native";
+import { View, StyleSheet } from "react-native";
 
-import {Image} from "expo-image";
-import {useRouter} from "expo-router";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 
-import auth, {FirebaseAuthTypes} from "@react-native-firebase/auth";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
 import BrandIcon from "@/assets/images/branding/logo.png";
 

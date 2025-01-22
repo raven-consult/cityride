@@ -42,7 +42,6 @@ const SelectRoute = ({ selectedRoute }: SelectRouteProps): JSX.Element => {
           />
         </View>
       </View>
-
       <View style={styles.selectedStationContainer}>
         <Text style={textStyles.selectedStation}>{selectedStation}</Text>
       </View>

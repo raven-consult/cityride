@@ -21,7 +21,7 @@ export const getRoutes = onRequest(async (req, res) => {
   if (!start || !end) {
     throw new HttpsError("invalid-argument", "Invalid request data");
   }
-  
+
   const inputString = `${JSON.stringify(start)}:${JSON.stringify(end)}`;
   const hash = crypto.createHash("sha256").update(inputString).digest("hex");
 
