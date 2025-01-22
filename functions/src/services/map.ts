@@ -71,8 +71,6 @@ const getGMapsRoutes = async (start: Coordinate, end: Coordinate): Promise<MapRe
         }
       }
     },
-    travelMode: "DRIVE",
-    routingPreference: "TRAFFIC_AWARE",
     polylineEncoding: "GEO_JSON_LINESTRING",
     polylineQuality: "HIGH_QUALITY",
     computeAlternativeRoutes: false,
