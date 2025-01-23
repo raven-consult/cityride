@@ -1,12 +1,30 @@
 import React from "react";
-import { Pressable, Text, View, StyleSheet, StatusBar, ToastAndroid, Linking } from "react-native";
+import { Pressable, Text, View, StyleSheet, StatusBar, ToastAndroid, Linking, ActivityIndicator } from "react-native";
 
+import { DimensionValue } from "react-native";
 import { CameraPermissionStatus, Code } from "react-native-vision-camera";
+import BottomSheet, { BottomSheetView, BottomSheetBackgroundProps } from "@gorhom/bottom-sheet";
 import { Camera, useCameraDevice, useCameraFormat, useCodeScanner } from "react-native-vision-camera";
 
+import Octicons from "@expo/vector-icons/Octicons";
+
+import { confirmRide } from "@/services/rides";
+import { useAppContext } from "@/context/AppContext";
+
+enum CaptureState {
+  Scanning,
+  Captured,
+  Verifying,
+  Failed,
+}
 
 const CaptureQRCode = (): JSX.Element => {
-  const [codes, setCodes] = React.useState<Code[]>([]);
+  const { pendingRide } = useAppContext();
+  const snapPoints = React.useMemo(() => ["10%"], []);
+  const bottomSheetRef = React.useRef<BottomSheet>(null);
+
+  const [capturedCode, setCapturedCode] = React.useState<Code | null>(null);
+  const [captureState, setCaptureState] = React.useState<CaptureState>(CaptureState.Scanning);
   const [cameraPermissionStatus, setCameraPermissionStatus] = React.useState<CameraPermissionStatus>("not-determined");
 
   const device = useCameraDevice("back");
@@ -17,26 +35,47 @@ const CaptureQRCode = (): JSX.Element => {
     { fps: 60 }
   ]);
 
-  React.useEffect(() => {
-    console.log(cameraPermissionStatus);
-  }, []);
-
   const codeScanner = useCodeScanner({
     codeTypes: ["qr", "ean-13"],
     onCodeScanned: (codes) => {
-      setCodes(codes);
-      console.log(`Scanned ${codes.length} codes!`);
-    }
+      setCapturedCode(codes[0]);
+      ToastAndroid.show(`Scanned: ${ codes[0].value }`, ToastAndroid.SHORT);
+      console.log(`Scanned ${ codes.length } codes!`);
+    },
   });
 
   const requestCameraPermission = React.useCallback(async () => {
-    console.log("Requesting camera permission...");
     const permission = await Camera.requestCameraPermission();
-    console.log(`Camera permission status: ${permission}`);
 
     if (permission === "denied") await Linking.openSettings();
     setCameraPermissionStatus(permission);
   }, []);
+
+  React.useEffect(() => {
+    console.log("pendingRide", pendingRide);
+    (async () => {
+      if (
+        capturedCode
+        && capturedCode.value
+        && pendingRide
+      ) {
+        setCaptureState(CaptureState.Verifying);
+        console.log(`Captured code: ${ capturedCode.value }`);
+        const res = await confirmRide(pendingRide.id, capturedCode.value);
+
+        if (res == "success") {
+          setCaptureState(CaptureState.Captured);
+        } else if (res == "error") {
+          setCaptureState(CaptureState.Failed);
+        }
+
+        setTimeout(() => {
+          setCapturedCode(null);
+          setCaptureState(CaptureState.Scanning);
+        }, 3000);
+      }
+    })();
+  }, [capturedCode]);
 
   React.useEffect(() => {
     (async () => {
@@ -44,13 +83,6 @@ const CaptureQRCode = (): JSX.Element => {
       setCameraPermissionStatus(getCurrentPermission);
     })();
   }, []);
-
-  React.useEffect(() => {
-    if (codes.length > 0) {
-      const code = codes[0];
-      ToastAndroid.show(`Scanned ${code.value} codes!`, ToastAndroid.SHORT);
-    }
-  }, [codes]);
 
   if (cameraPermissionStatus !== "granted") {
     return (
@@ -72,25 +104,23 @@ const CaptureQRCode = (): JSX.Element => {
         codeScanner={codeScanner}
         style={StyleSheet.absoluteFill}
       />
-
       <View style={{
-        position: "absolute",
         width: "100%",
         height: "100%",
         alignItems: "center",
+        position: "absolute",
         justifyContent: "center",
       }}>
-        <View style={{ width: 300, height: 300, borderWidth: 1, borderColor: "white" }}></View>
+        {marker("white", 240, "25%", 5.5, 20)}
       </View>
 
       <View style={{
-        position: "absolute",
         bottom: "10%",
         width: "100%",
+        position: "absolute",
         alignItems: "center",
         justifyContent: "center",
       }}>
-
         <View style={{
           borderRadius: 50,
           paddingVertical: 8,
@@ -100,9 +130,20 @@ const CaptureQRCode = (): JSX.Element => {
           <Text style={{ color: "white" }}>Position your camera at the QR code</Text>
         </View>
       </View>
+
+      <ConfirmedCustomer
+        status={captureState}
+      />
     </View>
   );
 };
+
+const BottomSheetBackground = ({ style }: BottomSheetBackgroundProps) => {
+  return (
+    <View style={[{ borderRadius: 12, backgroundColor: "white" }, style,]} />
+  );
+};
+
 
 
 interface RequestPermissionsProps {
@@ -130,8 +171,58 @@ const NoCameraDeviceError = (): JSX.Element => {
   );
 };
 
+interface ConfirmedCustomerProps {
+  status: CaptureState;
+}
+
+const ConfirmedCustomer = ({ status }: ConfirmedCustomerProps): JSX.Element => {
+  return (
+    <View style={{
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      position: "absolute",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "rgba(0, 0, 0, 0.7)",
+      display: status != CaptureState.Scanning ? "flex" : "none",
+    }}>
+      {status == CaptureState.Captured && (
+        <Octicons name="check-circle-fill" size={120} color="white" />
+      )}
+      {status == CaptureState.Failed && (
+        <Octicons name="x-circle-fill" size={120} color="white" />
+      )}
+      {status == CaptureState.Verifying && (
+        <ActivityIndicator
+          size={120}
+          color="white"
+        />
+      )}
+    </View>
+  );
+};
+
 
 export default CaptureQRCode;
+
+function marker(color: string, size: DimensionValue, borderLength: DimensionValue, thickness: number = 2, borderRadius: number = 0): JSX.Element {
+  return <View style={{ height: size, width: size }}>
+    <View style={{ position: 'absolute', height: borderLength, width: borderLength, top: 0, left: 0, borderColor: color, borderTopWidth: thickness, borderLeftWidth: thickness, borderTopLeftRadius: borderRadius }}></View>
+    <View style={{ position: 'absolute', height: borderLength, width: borderLength, top: 0, right: 0, borderColor: color, borderTopWidth: thickness, borderRightWidth: thickness, borderTopRightRadius: borderRadius }}></View>
+    <View style={{ position: 'absolute', height: borderLength, width: borderLength, bottom: 0, left: 0, borderColor: color, borderBottomWidth: thickness, borderLeftWidth: thickness, borderBottomLeftRadius: borderRadius }}></View>
+    <View style={{ position: 'absolute', height: borderLength, width: borderLength, bottom: 0, right: 0, borderColor: color, borderBottomWidth: thickness, borderRightWidth: thickness, borderBottomRightRadius: borderRadius }}></View>
+  </View>
+}
+
+
+const textStyles = StyleSheet.create({
+  verifyQRCodeStatusText: {
+    fontSize: 13,
+    fontFamily: "DMSans-Regular",
+  }
+});
 
 
 const styles = StyleSheet.create({
@@ -141,6 +232,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "white",
+  },
+  verifyQRCodeStatusContainer: {
+    gap: 4,
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  verifyQRCodeStatusContainerLoading: {
+    gap: 4,
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  sheetContainer: {
+    padding: 12,
+    marginHorizontal: 12,
   },
   mainContainer: {
     bottom: 0,

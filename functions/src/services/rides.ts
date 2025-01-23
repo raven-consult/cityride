@@ -230,7 +230,7 @@ export const boardRide = onRequest(async (req, res) => {
 
 
 export const passengerCancelRide = onRequest(async (req, res) => {
-  if(!await isAuthorized(req, res)) return;
+  if (!await isAuthorized(req, res)) return;
 
   const { rideId, passengerId } = req.body;
 
