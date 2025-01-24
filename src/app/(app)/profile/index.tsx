@@ -168,14 +168,14 @@ const Profile = (): JSX.Element => {
           title="FAQs"
           icon={HelpIcon}
           onPress={() => {
-            router.push("/(profile)/faq");
+            router.push("/(profile)/Faq");
           }}
         />
         <SectionItem
           title="Help"
           icon={InfoIcon}
           onPress={() => {
-            router.push("/(profile)/help");
+            router.push("/(profile)/Help");
           }}
         />
         <SectionItem
