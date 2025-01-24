@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, Pressable, ViewStyle, ImageSourcePropType } from "react-native";
 
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 
 import HelpIcon from "@/assets/icons/help.svg";
 import InfoIcon from "@/assets/icons/info.svg";
@@ -38,6 +39,8 @@ const Icon = ({ icon, style }: IconProps): JSX.Element => {
 }
 
 const Profile = (): JSX.Element => {
+  const router = useRouter();
+
   const ProfileInfo = (
     <View style={styles.profileInfoContainer}>
       <View style={{
@@ -63,7 +66,11 @@ const Profile = (): JSX.Element => {
         <Text style={textStyles.emailText}>damiakpan@gmail.com</Text>
       </View>
 
-      <Pressable style={styles.editProfileButton}>
+      <Pressable
+        onPress={() => {
+          router.push("/(profile)/edit-profile");
+        }}
+        style={styles.editProfileButton}>
         <Icon
           icon={EditIcon}
           style={{ width: 12, height: 12 }}
@@ -137,29 +144,39 @@ const Profile = (): JSX.Element => {
         <SectionItem
           title="Driver Information"
           icon={DriverIcon}
-          onPress={() => { }}
+          onPress={() => {
+            router.push("/(profile)/driver-information");
+          }}
         />
         <SectionItem
           title="Wallet"
           icon={WalletIcon}
-          onPress={() => { }}
+          onPress={() => {
+            router.push("/(profile)/wallet");
+          }}
         />
         <SectionItem
-          title="History"
+          title="Ride History"
           icon={HistoryIcon}
-          onPress={() => { }}
+          onPress={() => {
+            router.push("/(profile)/ride-history");
+          }}
         />
       </SectionItemContainer>
       <SectionItemContainer>
         <SectionItem
           title="FAQs"
           icon={HelpIcon}
-          onPress={() => { }}
+          onPress={() => {
+            router.push("/(profile)/faq");
+          }}
         />
         <SectionItem
           title="Help"
           icon={InfoIcon}
-          onPress={() => { }}
+          onPress={() => {
+            router.push("/(profile)/help");
+          }}
         />
         <SectionItem
           title="Logout"
