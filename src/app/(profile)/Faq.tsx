@@ -1,9 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import ColorTheme from "@/design-system/themes/color";
-import Typography from "@/design-system/themes/typography";
-import Accordion from "@/design-system/components/Accordion";
+import Accordion from "@/components/Accordion";
 
 
 const faqItems = [
@@ -31,13 +29,22 @@ const FaqPage = () => {
           <Accordion
             key={index}
             title={(
-              <Text style={[Typography.body, {
+              <Text style={[{
+                fontSize: 16,
+                lineHeight: 20,
+                letterSpacing: 0.5,
+                fontFamily: "DMSans-Regular",
                 width: "85%",
               }]}>{item.title}</Text>
             )}
             content={(
               <View style={styles.answerContainer}>
-                <Text style={[Typography.caption, styles.answerText]}>{item.content}</Text>
+                <Text style={[{
+                  lineHeight: 20,
+                  fontSize: 13.333,
+                  letterSpacing: 0.25,
+                  fontFamily: "DMSans-Regular",
+                }, styles.answerText]}>{item.content}</Text>
               </View>
             )}
           />
@@ -55,7 +62,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   answerText: {
-    color: ColorTheme.neutralDarkModeLight,
+    color: "hsl(0, 0%, 70%)",
   },
   dropDown: {
     padding: 12,

@@ -4,7 +4,6 @@ import { StyleSheet, View } from "react-native";
 import Markdown from "react-native-markdown-display";
 
 import ColorTheme from "@/design-system/themes/color";
-import Typography from "@/design-system/themes/typography";
 
 const body = `
 We"re here to assist you with any questions, issues, or feedback regarding the app. Explore the following options to find answers or get in touch with us:
@@ -28,10 +27,9 @@ const HelpPage = () => {
     <View style={styles.container}>
       <Markdown style={{
         heading4: {
-          ...Typography.heading5,
           fontSize: 18,
           paddingVertical: 16,
-          fontFamily: "Nunito-SemiBold",
+          fontFamily: "DMSans-SemiBold",
         },
         blockquote: {
           borderLeftWidth: 0,
@@ -40,19 +38,21 @@ const HelpPage = () => {
           color: ColorTheme.neutralDarkModeLight,
         },
         heading3: {
-          ...Typography.heading4,
           lineHeight: 40,
         },
         strong: {
-          ...Typography.body,
-          // fontWeight: "700",
-          fontFamily: "Nunito-Semibold",
+          fontFamily: "DMSans-Semibold",
         },
         link: {
           color: "rgb(49, 97, 255)",
         },
         body: {
-          ...Typography.body,
+          ...{
+            fontSize: 16,
+            lineHeight: 20,
+            letterSpacing: 0.5,
+            fontFamily: "DMSans-Regular",
+          },
           color: ColorTheme.neutralDarkModeDarkest
         },
       }}>
@@ -69,4 +69,4 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 12,
   }
-})
+});

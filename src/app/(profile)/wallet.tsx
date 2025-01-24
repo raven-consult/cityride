@@ -11,7 +11,7 @@ const Wallet = (): JSX.Element => {
         <Text style={textStyles.balanceText}>₦0.00</Text>
         <Text style={textStyles.currentBalanceText}>Current Balance</Text>
       </View>
-      <View style={{ gap: 12, flexDirection: "row", alignItems: "center" }}>
+      <View style={{ gap: 16, flexDirection: "row", alignItems: "center" }}>
         <View style={styles.buttonContainer}>
           <Text style={textStyles.buttonText}>Fund Wallet</Text>
           <Feather name="arrow-up-right" size={20} color="white" />
@@ -68,8 +68,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   topContainer: {
-    gap: 20,
-    height: "35%",
+    gap: 32,
+    height: "38%",
     paddingBottom: 28,
     alignItems: "center",
     borderBottomWidth: 1,
