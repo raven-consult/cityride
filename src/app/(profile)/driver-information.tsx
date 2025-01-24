@@ -4,11 +4,15 @@ import { View, Text, StyleSheet, TextInput, Pressable, ActivityIndicator } from 
 import { useFormik } from "formik";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
+import Fontisto from "@expo/vector-icons/Fontisto";
+
+import { UserData } from "@/types";
 import { getUserInfo, updateDriverInfo } from "@/services/user";
 
 
 const DriverInformation = (): JSX.Element => {
   const [loading, setLoading] = React.useState<boolean>(false);
+  const [userData, setUserData] = React.useState<UserData | null>(null);
   const [currentUser, setCurrentUser] = React.useState<FirebaseAuthTypes.User | null>(null);
 
   const formik = useFormik({
@@ -43,6 +47,7 @@ const DriverInformation = (): JSX.Element => {
       const user = await getUserInfo(currentUser.uid);
       formik.setFieldValue("carNumber", user?.driverInfo?.carNumber || "");
       formik.setFieldValue("maxPassengers", user?.driverInfo?.maxPassengers.toString() || "");
+      setUserData(user);
     })();
   }, [currentUser]);
 
@@ -55,6 +60,26 @@ const DriverInformation = (): JSX.Element => {
       });
     return () => subscriber();
   }, []);
+
+  if (!userData) {
+    return (
+      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+        <ActivityIndicator
+          size={70}
+          color="black"
+        />
+      </View>
+    );
+  };
+
+  if (userData.role !== "driver") {
+    return (
+      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+        <Fontisto name="car" size={70} color="hsl(0, 0%, 65%)" />
+        <Text style={{ fontSize: 15, fontFamily: "DMSans-Regular" }}>You are not a driver</Text>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
