@@ -1,4 +1,5 @@
 import React from "react";
+import { Easing } from "react-native";
 
 import { Image } from "expo-image";
 import { Tabs } from "expo-router";
@@ -22,7 +23,23 @@ import AppContextProvider from "@/context/AppContext";
 const Layout = (): JSX.Element => {
   return (
     <AppContextProvider>
-      <Tabs screenOptions={{ headerShown: false }} tabBar={(props) => <BottomTabBar {...props} />}>
+      <Tabs screenOptions={{ 
+        transitionSpec: {
+          animation: 'timing',
+          config: {
+            duration: 150,
+            easing: Easing.inOut(Easing.ease),
+          },
+        },
+        sceneStyleInterpolator: ({ current }) => ({
+          sceneStyle: {
+            opacity: current.progress.interpolate({
+              inputRange: [-1, 0, 1],
+              outputRange: [0, 1, 0],
+            }),
+          },
+        }),
+         headerShown: false }} tabBar={(props) => <BottomTabBar {...props} />}>
         <Tabs.Screen
           name="discover/index"
           options={{
