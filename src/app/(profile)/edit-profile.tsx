@@ -50,10 +50,10 @@ const styles = StyleSheet.create({
   textInput: {
     height: 48,
     fontSize: 15,
-    borderWidth: 1,
     borderRadius: 8,
+    borderWidth: 0.7,
     paddingHorizontal: 8,
     fontFamily: "DMSans-Regular",
-    borderColor: "hsl(0, 0%, 30%)",
+    borderColor: "hsl(0, 0%, 70%)",
   },
 });

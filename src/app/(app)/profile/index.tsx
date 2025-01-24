@@ -155,13 +155,20 @@ const Profile = (): JSX.Element => {
             router.push("/(profile)/wallet");
           }}
         />
-        <SectionItem
+        {/* <SectionItem
+          title="Wallet (Old)"
+          icon={WalletIcon}
+          onPress={() => {
+            router.push("/(profile)/Wallet");
+          }}
+        /> */}
+        {/* <SectionItem
           title="Ride History"
           icon={HistoryIcon}
           onPress={() => {
             router.push("/(profile)/ride-history");
           }}
-        />
+        /> */}
       </SectionItemContainer>
       <SectionItemContainer>
         <SectionItem
