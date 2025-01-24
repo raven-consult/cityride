@@ -132,3 +132,37 @@ export const passengerCancelRide = async (rideId: string, passengerId: string) =
   const data = await res.text();
   return data;
 }
+
+type ConfirmRideResponse = "success" | "error";
+
+export const confirmRide = async (rideId: string, passengerCode: string): Promise<ConfirmRideResponse> => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve("success");
+    }, 2000);
+  });
+
+  const url = getUrl("rideShare-confirmRide");
+  const authToken = await auth().currentUser?.getIdToken();
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`
+    },
+    body: JSON.stringify({
+      rideId,
+      passengerCode,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.log("Error", text);
+    throw new Error(text);
+  }
+
+  const data = await res.text();
+  return data as ConfirmRideResponse;
+}
