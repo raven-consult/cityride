@@ -2,7 +2,8 @@ import React from "react";
 import { View, Text, StyleSheet, Pressable, ViewStyle, ImageSourcePropType } from "react-native";
 
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
 import HelpIcon from "@/assets/icons/help.svg";
 import InfoIcon from "@/assets/icons/info.svg";
@@ -14,32 +15,21 @@ import LogoutIcon from "@/assets/icons/log-out.svg";
 import HistoryIcon from "@/assets/icons/history.svg";
 import ChevronRight from "@/assets/icons/chevron.svg";
 
-interface IconProps {
-  style: ViewStyle,
-  icon: ImageSourcePropType;
-}
-
-const Icon = ({ icon, style }: IconProps): JSX.Element => {
-  return (
-    <View style={[
-      {
-        width: 24,
-        height: 24,
-        alignItems: "center",
-        justifyContent: "center",
-      },
-      style
-    ]}>
-      <Image
-        source={icon}
-        style={{ width: "100%", height: "100%" }}
-      />
-    </View>
-  )
-}
 
 const Profile = (): JSX.Element => {
   const router = useRouter();
+  const [currentUser, setCurrentUser] = React.useState<FirebaseAuthTypes.User | null>(null);
+
+  const updateUser = React.useCallback(() => {
+    const subscriber = auth()
+      .onAuthStateChanged((user) => {
+        if (user) {
+          setCurrentUser(user);
+        }
+      });
+    return () => subscriber();
+  }, [currentUser]);
+  useFocusEffect(updateUser);
 
   const ProfileInfo = (
     <View style={styles.profileInfoContainer}>
@@ -52,18 +42,25 @@ const Profile = (): JSX.Element => {
         justifyContent: "center",
         backgroundColor: "hsl(0, 0%, 95%)",
       }}>
-        <Image
-          source={UserIcon}
-          style={{ width: "100%", height: "100%" }}
-        />
+        {currentUser && currentUser.photoURL ? (
+          <Image
+            source={{ uri: currentUser.photoURL }}
+            style={{ width: "100%", height: "100%" }}
+          />
+        ) : (
+          <Image
+            source={UserIcon}
+            style={{ width: "100%", height: "100%" }}
+          />
+        )}
       </View>
 
       <View style={{
         alignItems: "center",
         justifyContent: "center",
       }}>
-        <Text style={[textStyles.usernameText]}>Damian Akpan</Text>
-        <Text style={textStyles.emailText}>damiakpan@gmail.com</Text>
+        <Text style={[textStyles.usernameText]}>{currentUser?.displayName}</Text>
+        <Text style={textStyles.emailText}>{currentUser?.email}</Text>
       </View>
 
       <Pressable
@@ -205,6 +202,30 @@ const Profile = (): JSX.Element => {
 
 
 export default Profile;
+
+interface IconProps {
+  style: ViewStyle,
+  icon: ImageSourcePropType;
+}
+
+const Icon = ({ icon, style }: IconProps): JSX.Element => {
+  return (
+    <View style={[
+      {
+        width: 24,
+        height: 24,
+        alignItems: "center",
+        justifyContent: "center",
+      },
+      style
+    ]}>
+      <Image
+        source={icon}
+        style={{ width: "100%", height: "100%" }}
+      />
+    </View>
+  )
+}
 
 
 const textStyles = StyleSheet.create({

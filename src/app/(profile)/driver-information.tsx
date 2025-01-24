@@ -1,19 +1,60 @@
 import React from "react";
-import { View, Text, StyleSheet, TextInput, Pressable } from "react-native";
+import { View, Text, StyleSheet, TextInput, Pressable, ActivityIndicator } from "react-native";
 
 import { useFormik } from "formik";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+
+import { getUserInfo, updateDriverInfo } from "@/services/user";
 
 
 const DriverInformation = (): JSX.Element => {
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const [currentUser, setCurrentUser] = React.useState<FirebaseAuthTypes.User | null>(null);
+
   const formik = useFormik({
     initialValues: {
       carNumber: "",
-      carCapacity: "",
+      maxPassengers: "",
     },
-    onSubmit: (values) => {
-      console.log(values);
+    onSubmit: async (values) => {
+      if (!currentUser) return null;
+      setLoading(true);
+
+      try {
+        await updateDriverInfo(
+          currentUser.uid,
+          {
+            carNumber: values.carNumber,
+            maxPassengers: parseInt(values.maxPassengers),
+          },
+        );
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
     },
   });
+
+  React.useEffect(() => {
+    (async () => {
+      if (!currentUser) return null;
+
+      const user = await getUserInfo(currentUser.uid);
+      formik.setFieldValue("carNumber", user?.driverInfo?.carNumber || "");
+      formik.setFieldValue("maxPassengers", user?.driverInfo?.maxPassengers.toString() || "");
+    })();
+  }, [currentUser]);
+
+  React.useEffect(() => {
+    const subscriber = auth()
+      .onAuthStateChanged((user: FirebaseAuthTypes.User | null) => {
+        if (user) {
+          setCurrentUser(user);
+        }
+      });
+    return () => subscriber();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -21,7 +62,7 @@ const DriverInformation = (): JSX.Element => {
         <View style={styles.textContainer}>
           <Text style={textStyles.inputText}>Car Number</Text>
           <TextInput
-            placeholder="KTU 123 AB"
+            placeholder="KTU-123-AB"
             style={styles.textInput}
             value={formik.values.carNumber}
             onChangeText={formik.handleChange("carNumber")}
@@ -32,8 +73,8 @@ const DriverInformation = (): JSX.Element => {
           <TextInput
             placeholder="4"
             style={styles.textInput}
-            value={formik.values.carCapacity}
-            onChangeText={formik.handleChange("carCapacity")}
+            value={formik.values.maxPassengers}
+            onChangeText={formik.handleChange("maxPassengers")}
           />
         </View>
       </View>
@@ -43,7 +84,11 @@ const DriverInformation = (): JSX.Element => {
           style={styles.submitButton}
           onPress={() => formik.handleSubmit()}
         >
-          <Text style={textStyles.submitBtn}>Submit</Text>
+          {loading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={textStyles.submitBtn}>Submit</Text>
+          )}
         </Pressable>
       </View>
     </View>
