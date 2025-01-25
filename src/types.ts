@@ -17,16 +17,30 @@ export interface Station {
   coordinates: Coordinate;
 }
 
+export interface Transaction {
+  id: string;
+  title: string;
+  sender: string;
+  amount: number;
+  timestamp: Date;
+  receiver: string;
+  comment?: string;
+  type: "credit" | "debit";
+}
+
+
 export type Role = "passenger" | "driver";
+
+export interface DriverInfo {
+  carNumber: string;
+  maxPassengers: number;
+}
 
 export interface UserData {
   role: Role;
   email: string;
   displayName: string;
-  driverInfo?: {
-    carNumber: string;
-    maxPassengers: number;
-  };
+  driverInfo?: DriverInfo;
 }
 
 export interface Ride {
