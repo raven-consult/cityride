@@ -142,7 +142,7 @@ const Wallet = (): JSX.Element => {
           showsVerticalScrollIndicator={false}
         >
           <View style={{
-            height: 48,
+            height: 10,
             paddingHorizontal: 4,
             flexDirection: "row",
             alignItems: "center",
@@ -244,7 +244,6 @@ const textStyles = StyleSheet.create({
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 40,
     paddingHorizontal: 14,
   },
   transactionContainer: {
