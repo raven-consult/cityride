@@ -42,6 +42,13 @@ const Layout = (): JSX.Element => {
         }}
       />
       <Stack.Screen
+        name="fund-wallet"
+        options={{
+          headerShown: false,
+          statusBarStyle: "dark",
+        }}
+      />
+      <Stack.Screen
         name="Faq"
         options={{
           title: "FAQs",
