@@ -153,13 +153,6 @@ const Profile = (): JSX.Element => {
           }}
         />
         {/* <SectionItem
-          title="Wallet (Old)"
-          icon={WalletIcon}
-          onPress={() => {
-            router.push("/(profile)/Wallet");
-          }}
-        /> */}
-        {/* <SectionItem
           title="Ride History"
           icon={HistoryIcon}
           onPress={() => {
