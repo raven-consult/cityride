@@ -23,23 +23,26 @@ import AppContextProvider from "@/context/AppContext";
 const Layout = (): JSX.Element => {
   return (
     <AppContextProvider>
-      <Tabs screenOptions={{ 
-        transitionSpec: {
-          animation: 'timing',
-          config: {
-            duration: 150,
-            easing: Easing.inOut(Easing.ease),
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          transitionSpec: {
+            animation: "timing",
+            config: {
+              duration: 150,
+              easing: Easing.inOut(Easing.ease),
+            },
           },
-        },
-        sceneStyleInterpolator: ({ current }) => ({
-          sceneStyle: {
-            opacity: current.progress.interpolate({
-              inputRange: [-1, 0, 1],
-              outputRange: [0, 1, 0],
-            }),
-          },
-        }),
-         headerShown: false }} tabBar={(props) => <BottomTabBar {...props} />}>
+          sceneStyleInterpolator: ({ current }) => ({
+            sceneStyle: {
+              opacity: current.progress.interpolate({
+                inputRange: [-1, 0, 1],
+                outputRange: [0, 1, 0],
+              }),
+            },
+          }),
+        }}
+        tabBar={(props) => <BottomTabBar {...props} />}>
         <Tabs.Screen
           name="discover/index"
           options={{

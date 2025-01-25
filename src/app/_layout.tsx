@@ -54,6 +54,7 @@ const RootLayout = (): JSX.Element => {
       <Stack screenOptions={{
         animation: "fade",
         headerShown: false,
+        statusBarStyle: "dark",
         contentStyle: { backgroundColor: "white" },
       }}>
         <Stack.Screen name="(app)" />
