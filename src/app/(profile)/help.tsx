@@ -3,8 +3,6 @@ import { StyleSheet, View } from "react-native";
 
 import Markdown from "react-native-markdown-display";
 
-import ColorTheme from "@/design-system/themes/color";
-
 const body = `
 We"re here to assist you with any questions, issues, or feedback regarding the app. Explore the following options to find answers or get in touch with us:
 
@@ -35,7 +33,7 @@ const HelpPage = () => {
           borderLeftWidth: 0,
           paddingVertical: 4,
           backgroundColor: "transparent",
-          color: ColorTheme.neutralDarkModeLight,
+          color: "hsl(0, 0%, 29%)",
         },
         heading3: {
           lineHeight: 40,
@@ -53,7 +51,7 @@ const HelpPage = () => {
             letterSpacing: 0.5,
             fontFamily: "DMSans-Regular",
           },
-          color: ColorTheme.neutralDarkModeDarkest
+          color: "hsl(0, 0%, 29%)"
         },
       }}>
         {body}
