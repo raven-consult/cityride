@@ -1,31 +1,87 @@
 import React from "react";
-import { Text, View, StyleSheet, ScrollView, ViewStyle, ImageSourcePropType, Pressable, Linking } from "react-native";
+import { Text, View, ToastAndroid as Toast, ActivityIndicator, StyleSheet, ScrollView, ViewStyle, ImageSourcePropType, Pressable, Linking } from "react-native";
 
-import { Image } from "expo-image";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+
 import { useRouter } from "expo-router";
 import Feather from "@expo/vector-icons/Feather";
 
 import { Transaction } from "@/types";
 import Spacer from "@/components/Spacer";
+import ImageIcon from "@/components/ImageIcon";
+import { getLastTransactions, getWallet } from "@/services/wallet";
+
 import ArrowLeftIcon from "@/assets/icons/arrow_left.svg";
 
 
 const Wallet = (): JSX.Element => {
   const router = useRouter();
-  const [transactions, setTransactions] = React.useState<Transaction[] | null>([...allTransactions, ...allTransactions]);
+
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const [balance, setBalance] = React.useState<number | null>(null);
+  const [transactions, setTransactions] = React.useState<Transaction[] | null>(null);
+  const [currentUser, setCurrentUser] = React.useState<FirebaseAuthTypes.User | null>(null);
 
   React.useEffect(() => {
-    setTransactions(allTransactions);
+    const subscriber = auth()
+      .onAuthStateChanged((user: FirebaseAuthTypes.User | null) => {
+        if (user) {
+          setCurrentUser(user);
+        }
+      });
+    return () => subscriber();
   }, []);
+
+  React.useEffect(() => {
+    (async () => {
+      if (!currentUser) return null;
+      setLoading(true);
+
+      await Promise.all([
+        (async () => {
+          try {
+            const wallet = await getWallet(currentUser.uid);
+            setBalance(wallet.balance);
+          } catch (error: any) {
+            console.error(error);
+            const message = `Error: ${error.message}`;
+            const duration = Toast.LONG;
+            Toast.show(message, duration);
+          }
+        })(),
+        (async () => {
+          try {
+            const transactions = await getLastTransactions(currentUser.uid);
+            setTransactions(transactions);
+          } catch (error: any) {
+            console.error(error);
+            const message = `Error: ${error.message}`;
+            const duration = Toast.LONG;
+            Toast.show(message, duration);
+          }
+        })(),
+      ]);
+      setLoading(false);
+    })();
+  }, [currentUser]);
 
   const onPressWithdraw = () => {
     Linking.openURL("tel:08184223451");
   }
 
+  const formattedBalance = React.useMemo(() => {
+    if (!balance) return "0.00";
+
+    const wholeNumber = Math.floor(balance);
+    const decimal = (balance - wholeNumber).toFixed(2).split(".")[1];
+
+    return `${wholeNumber.toLocaleString()}.${decimal}`;
+  }, [balance]);
+
   const TopContainer = (
     <View style={styles.topContainer}>
       <View style={{ justifyContent: "center", alignItems: "center" }}>
-        <Text style={textStyles.balanceText}>₦0.00</Text>
+        <Text style={textStyles.balanceText}>₦{formattedBalance}</Text>
         <Text style={textStyles.currentBalanceText}>Current Balance</Text>
       </View>
       <View style={{ gap: 16, flexDirection: "row", alignItems: "center" }}>
@@ -55,7 +111,7 @@ const Wallet = (): JSX.Element => {
       </View>
 
       <View>
-        {transactions.map((transaction, index) => (
+        {transactions && transactions.map((transaction, index) => (
           <TransactionItem
             key={index}
             transaction={transaction}
@@ -66,52 +122,44 @@ const Wallet = (): JSX.Element => {
   );
 
   return (
-    <ScrollView
-      style={styles.container}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={{
-        height: 48,
-        paddingHorizontal: 4,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between"
-      }}>
-        <Pressable onPress={() => router.back()}>
-          <Icon icon={ArrowLeftIcon} style={{ width: 26, height: 26 }} />
-        </Pressable>
-      </View>
-      {TopContainer}
-      <Spacer height={12} />
-      {BottomContainer}
-    </ScrollView>
+    <>
+      {loading && (
+        <View style={{
+          height: "100%",
+          width: "100%",
+          alignItems: "center",
+          justifyContent: "center",
+        }}>
+          <ActivityIndicator
+            size={100}
+            color="black"
+          />
+        </View>
+      )}
+      {!loading && (
+        <ScrollView
+          style={styles.container}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={{
+            height: 48,
+            paddingHorizontal: 4,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between"
+          }}>
+            <Pressable onPress={() => router.back()}>
+              <ImageIcon icon={ArrowLeftIcon} style={{ width: 26, height: 26 }} />
+            </Pressable>
+          </View>
+          {TopContainer}
+          <Spacer height={12} />
+          {BottomContainer}
+        </ScrollView>
+      )}
+    </>
   );
 };
-
-
-interface IconProps {
-  style: ViewStyle,
-  icon: ImageSourcePropType;
-}
-
-const Icon = ({ icon, style }: IconProps): JSX.Element => {
-  return (
-    <View style={[
-      {
-        width: 24,
-        height: 24,
-        alignItems: "center",
-        justifyContent: "center",
-      },
-      style
-    ]}>
-      <Image
-        source={icon}
-        style={{ width: "100%", height: "100%" }}
-      />
-    </View>
-  )
-}
 
 
 interface TransactionItemProps {
@@ -160,75 +208,6 @@ const TransactionItem = ({ transaction }: TransactionItemProps): JSX.Element => 
 };
 
 
-const allTransactions: Transaction[] = [
-  {
-    id: "tx-001",
-    title: "Ride to Downtown",
-    sender: "John Doe",
-    receiver: "CityRide Corp",
-    amount: 25.50,
-    timestamp: new Date("2024-03-10T09:30:00"),
-    type: "credit",
-    comment: "Morning commute"
-  },
-  {
-    id: "tx-002",
-    title: "Driver Payout",
-    sender: "CityRide Corp",
-    receiver: "Alice Smith",
-    amount: 150.75,
-    timestamp: new Date("2024-03-11T16:45:00"),
-    type: "debit"
-  },
-  {
-    id: "tx-003",
-    title: "Airport Transfer",
-    sender: "Bob Wilson",
-    receiver: "CityRide Corp",
-    amount: 75.00,
-    timestamp: new Date("2024-03-12T13:15:00"),
-    type: "credit"
-  },
-  {
-    id: "tx-004",
-    title: "Weekly Driver Bonus",
-    sender: "CityRide Corp",
-    receiver: "Charlie Brown",
-    amount: 200.00,
-    timestamp: new Date("2024-03-13T18:00:00"),
-    type: "debit",
-    comment: "Performance bonus"
-  },
-  {
-    id: "tx-005",
-    title: "Late Night Ride",
-    sender: "Diana Prince",
-    receiver: "CityRide Corp",
-    amount: 35.25,
-    timestamp: new Date("2024-03-14T23:20:00"),
-    type: "credit"
-  },
-  {
-    id: "tx-006",
-    title: "Maintenance Payout",
-    sender: "CityRide Corp",
-    receiver: "AutoFix Services",
-    amount: 450.00,
-    timestamp: new Date("2024-03-15T11:00:00"),
-    type: "debit"
-  },
-  {
-    id: "tx-007",
-    title: "Group Ride",
-    sender: "Eve Anderson",
-    receiver: "CityRide Corp",
-    amount: 45.80,
-    timestamp: new Date("2024-03-15T20:30:00"),
-    type: "credit",
-    comment: "Split fare ride"
-  }
-];
-
 const textStyles = StyleSheet.create({
   buttonText: {
     color: "white",
@@ -265,7 +244,6 @@ const textStyles = StyleSheet.create({
 
 const styles = StyleSheet.create({
   container: {
-    // flex: 1,
     paddingTop: 40,
     paddingHorizontal: 14,
   },
