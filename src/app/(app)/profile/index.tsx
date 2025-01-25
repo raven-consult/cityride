@@ -132,8 +132,8 @@ const Profile = (): JSX.Element => {
           />
         )}
       </Pressable>
-    )
-  }
+    );
+  };
 
   const SectionsContainer = (
     <View style={styles.sectionsContainer}>
@@ -165,14 +165,14 @@ const Profile = (): JSX.Element => {
           title="FAQs"
           icon={HelpIcon}
           onPress={() => {
-            router.push("/(profile)/Faq");
+            router.push("/(profile)/faq");
           }}
         />
         <SectionItem
           title="Help"
           icon={InfoIcon}
           onPress={() => {
-            router.push("/(profile)/Help");
+            router.push("/(profile)/help");
           }}
         />
         <SectionItem
