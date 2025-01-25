@@ -17,6 +17,11 @@ export interface Station {
   coordinates: Coordinate;
 }
 
+export interface Wallet {
+  id: string;
+  balance: number;
+}
+
 export interface Transaction {
   id: string;
   title: string;
@@ -27,7 +32,6 @@ export interface Transaction {
   comment?: string;
   type: "credit" | "debit";
 }
-
 
 export type Role = "passenger" | "driver";
 

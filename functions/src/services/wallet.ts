@@ -10,6 +10,7 @@ import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
 
 import { isAuthorized } from "../utils";
+import { InitializedTransaction, Transaction, UserTransaction, Wallet } from "../types";
 
 
 const kLastTransactionslimit = 10;
@@ -317,30 +318,4 @@ export const PassengerPayDriverForRide = (passengerId: string, driverId: string,
       },
     } satisfies Transaction);
   });
-}
-
-interface InitializedTransaction {
-  sender: string;
-  initialized: boolean;
-  date: typeof admin.database.ServerValue.TIMESTAMP;
-}
-
-interface Wallet {
-  id: string;
-  balance: number;
-}
-
-interface Transaction {
-  id?: string;
-  title: string;
-  sender: string;
-  amount: number;
-  timestamp: Date | FieldValue;
-  receiver: string;
-  comment?: string;
-  metadata: Record<string, any>;
-}
-
-interface UserTransaction extends Transaction {
-  type: "credit" | "debit";
 }

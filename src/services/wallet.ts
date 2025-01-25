@@ -1,15 +1,56 @@
-import { Transaction } from "@/types";
+import auth from "@react-native-firebase/auth";
+
+import { getUrl } from "@/utils";
+import { Transaction, Wallet } from "@/types";
 
 
-export const getLastTransactions = async (userId: string) => {
-  // Fetch last transactions
-  return allTransactions;
+export const getLastTransactions = async (userId: string): Promise<Transaction[]> => {
+  const url = getUrl("wallet-getLastTransactions");
+  const authToken = await auth().currentUser?.getIdToken();
+  const req = { userId };
+
+  const res = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(req),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.log("Error", text);
+    throw new Error(text);
+  }
+
+  const data = await res.json();
+  return data;
 };
 
 
-export const getWallet = async (userId: string) => {
-  // Fetch wallet
-  return { balance: 0 };
+export const getWallet = async (userId: string): Promise<Wallet> => {
+  const url = getUrl("wallet-getWallet");
+  const authToken = await auth().currentUser?.getIdToken();
+  const req = { userId };
+
+  const res = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(req),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.log("Error", text);
+    throw new Error(text);
+  }
+
+  const data = await res.json();
+  return data;
 }
 
 const allTransactions: Transaction[] = [
