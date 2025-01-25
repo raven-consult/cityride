@@ -55,15 +55,6 @@ export default () => {
             }
           }
         ],
-        [
-          "expo-splash-screen",
-          {
-            "image": "./src/assets/images/branding/splash.png",
-            "imageWidth": 200,
-            "resizeMode": "cover",
-            "backgroundColor": "#ffffff"
-          }
-        ],
         "react-native-vision-camera",
       ],
       "extra": {
