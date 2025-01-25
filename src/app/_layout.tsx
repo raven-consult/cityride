@@ -57,7 +57,12 @@ const RootLayout = (): JSX.Element => {
         statusBarStyle: "dark",
         contentStyle: { backgroundColor: "white" },
       }}>
-        <Stack.Screen name="(app)" />
+        <Stack.Screen
+          name="(app)"
+          options={{
+            statusBarStyle: "dark",
+          }}
+        />
         <Stack.Screen name="(onboarding)" />
       </Stack>
     </GestureHandlerRootView>
