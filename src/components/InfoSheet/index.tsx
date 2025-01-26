@@ -37,14 +37,14 @@ const InfoSheet = (): JSX.Element => {
     >
       <BottomSheetView style={styles.container}>
         <View style={styles.header}>
-          <Text style={textStyles.mainText}>Ride Boarded</Text>
+          <Text style={textStyles.mainText}>{info?.title}</Text>
         </View>
         <View style={styles.mainContainer}>
           <Text style={[textStyles.descriptionText, { flex: 1 }]}>
-            Your ride has been scheduled. You will be notified when your arrived has arrived.
+            {info?.description}
           </Text>
           <Image
-            source={RoadPathImg}
+            source={info?.illustration || RoadPathImg}
             style={{
               width: 72,
               height: 72,
@@ -53,9 +53,9 @@ const InfoSheet = (): JSX.Element => {
         </View>
         <View style={styles.ctaSection}>
           <Pressable
-            onPress={clearInfo}
+            onPress={info?.action?.onPress || clearInfo}
             style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
-            <Text style={textStyles.boardRideText}>Board Ride</Text>
+            <Text style={textStyles.boardRideText}>{info?.action?.text || "Continue"}</Text>
           </Pressable>
         </View>
       </BottomSheetView>

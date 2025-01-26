@@ -6,8 +6,11 @@ export interface Coordinate {
 export interface Info {
   title: string;
   description: string;
-  illustration: string;
-  action?: () => void;
+  illustration?: string;
+  action?: {
+    text: string;
+    onPress: () => void;
+  }
 }
 
 export interface Station {

@@ -80,7 +80,6 @@ const RideInfo = (): JSX.Element => {
             setCurrentRide(null);
             setInfo({
               title: "Ride Cancelled",
-              illustration: RoadPathImg,
               description: "Your ride has been cancelled. The driver will be notified",
             } as Info);
             resolve();
