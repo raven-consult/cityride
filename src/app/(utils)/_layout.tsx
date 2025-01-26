@@ -27,7 +27,6 @@ const Layout = (): JSX.Element => {
             return (
               <ExtendedAppBar
                 title={title}
-                leadingText="Skip for Now"
                 onPressBack={navigation.goBack}
               />
             );
