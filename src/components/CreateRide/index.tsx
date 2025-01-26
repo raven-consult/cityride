@@ -114,6 +114,7 @@ const CreateRide = (): JSX.Element => {
         snapPoints={snapPoints}
         handleComponent={() => null}
         enablePanDownToClose={false}
+        index={createRideMode ? 1: -1}
         backgroundComponent={props => <BottomSheetBackground {...props} />}
       >
         {step === Step.SelectRoute && (

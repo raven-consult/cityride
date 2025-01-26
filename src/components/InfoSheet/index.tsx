@@ -1,12 +1,11 @@
 import React from "react";
-
 import { View, Text, StyleSheet, Pressable } from "react-native";
 
 import { Image } from "expo-image";
 
-import { useAppContext } from "@/context/AppContext";
-
 import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gorhom/bottom-sheet";
+
+import { useAppContext } from "@/context/AppContext";
 
 import RoadPathImg from "@/assets/images/static/road-path.svg";
 
@@ -28,12 +27,12 @@ const InfoSheet = (): JSX.Element => {
 
   return (
     <RNBottomSheet
-      index={-1}
       enableDynamicSizing
       ref={bottomSheetRef}
       snapPoints={snapPoints}
       handleComponent={() => null}
       enablePanDownToClose={false}
+      index={info !== null ? 1 : -1}
       backgroundComponent={props => <BottomSheetBackground {...props} />}
     >
       <BottomSheetView style={styles.container}>
