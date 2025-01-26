@@ -15,7 +15,7 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { ExpoNotification } from "@/types";
 import useDMSans from "@/design/fonts/DM_Sans";
 import AppContextProvider from "@/context/AppContext";
-import { addNotification } from "@/services/notifications";
+import { addNotification, useNotifications } from "@/services/notifications";
 
 const NOTIFICATION_RECEIVED_TASK = "notification-received";
 
@@ -50,6 +50,7 @@ Notifications.registerTaskAsync(NOTIFICATION_RECEIVED_TASK);
 
 const RootLayout = (): JSX.Element => {
   const [loaded] = useDMSans();
+  const { expoPushToken } = useNotifications();
 
   React.useEffect(() => {
     (async () => {
@@ -66,6 +67,23 @@ const RootLayout = (): JSX.Element => {
       }
     })();
   }, []);
+
+  React.useEffect(() => {
+    let interval: NodeJS.Timeout;
+    (async () => {
+      const EVERY_30_SECS = 30 * 1000;
+      interval = setInterval(async () => {
+        const user = auth().currentUser;
+        if (user) {
+          const ref = database().ref(`/users/${user.uid}/notificationToken`);
+          await ref.set(expoPushToken);
+          clearInterval(interval);
+        }
+      }, EVERY_30_SECS);
+    })();
+
+    return () => clearInterval(interval);
+  }, [expoPushToken]);
 
   React.useEffect(() => {
     GoogleSignin.configure({
