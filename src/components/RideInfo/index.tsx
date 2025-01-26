@@ -2,6 +2,8 @@ import React from "react";
 
 import { View, Text, StyleSheet, Alert } from "react-native";
 
+import { useRouter } from "expo-router";
+
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gorhom/bottom-sheet";
 
@@ -16,7 +18,8 @@ import RoadPathImg from "@/assets/images/static/road-path.svg";
 
 
 const RideInfo = (): JSX.Element => {
-  const { setInfo } = useAppContext();
+  const router = useRouter();
+  const { setInfo, setRideCode } = useAppContext();
   const { ride, setCurrentRide } = useAppContext();
   const { pendingRide, setPendingRide } = useAppContext();
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
@@ -50,7 +53,8 @@ const RideInfo = (): JSX.Element => {
     if (!ride || !currentUser) return;
 
     try {
-      await boardRide(ride.id, currentUser.uid);
+      const rideCode = await boardRide(ride.id, currentUser.uid);
+      setRideCode(rideCode);
       setPendingRide(ride);
       setCurrentRide(null);
       setInfo({
@@ -94,6 +98,14 @@ const RideInfo = (): JSX.Element => {
       }
     ]);
   });
+
+  const onPressViewTicket = () => {
+    router.push("/(utils)/ride-ticket");
+  }
+
+  const onPressScanQRCode = () => {
+    router.push("/(utils)/capture-qrcode");
+  }
 
   const isPendingRide = React.useMemo(() => {
     return pendingRide?.id === ride?.id;
@@ -162,6 +174,7 @@ const RideInfo = (): JSX.Element => {
           <DriverBottomBar
             clearRide={clearRide}
             isPendingRide={isPendingRide}
+            onPressScanQRCode={onPressScanQRCode}
           />
         ) : (
           <PassengerBottomBar
@@ -169,6 +182,7 @@ const RideInfo = (): JSX.Element => {
             isPendingRide={isPendingRide}
             hasPendingRide={hasPendingRide}
             onPressBoardRide={onPressBoardRide}
+            onPressViewTicket={onPressViewTicket}
             onPressCancelRide={onPressCancelRide}
           />
         )}

@@ -55,7 +55,12 @@ export default () => {
             }
           }
         ],
-        "react-native-vision-camera",
+        [
+          "react-native-vision-camera",
+          {
+            "enableCodeScanner": true
+          }
+        ]
       ],
       "extra": {
         "eas": {
@@ -68,5 +73,4 @@ export default () => {
       }
     } satisfies ExpoConfig
   };
-
 }

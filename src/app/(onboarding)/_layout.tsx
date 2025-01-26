@@ -16,7 +16,6 @@ const Layout = (): JSX.Element => {
         name="index"
         options={{
           headerShown: false,
-          statusBarTranslucent: true,
         }}
       />
       <Stack.Screen
@@ -39,6 +38,7 @@ const Layout = (): JSX.Element => {
         name="location"
         options={{
           title: "Location Access",
+          statusBarTranslucent: true,
           header: ({ navigation, route, options }) => {
             const title = getHeaderTitle(options, route.name)
             return (

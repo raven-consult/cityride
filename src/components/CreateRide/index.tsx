@@ -90,7 +90,6 @@ const CreateRide = (): JSX.Element => {
     }
   }, [createRideMode]);
 
-
   React.useEffect(() => {
     const subscriber = auth()
       .onAuthStateChanged((user: FirebaseAuthTypes.User | null) => {
@@ -101,7 +100,6 @@ const CreateRide = (): JSX.Element => {
     return () => subscriber();
   }, []);
 
-
   return (
     <>
       <Header
@@ -111,7 +109,6 @@ const CreateRide = (): JSX.Element => {
         onPressNext={onPressNext}
       />
       <RNBottomSheet
-        index={-1}
         enableDynamicSizing
         ref={bottomSheetRef}
         snapPoints={snapPoints}
@@ -149,55 +146,3 @@ const BottomSheetBackground = ({ style }: BottomSheetBackgroundProps) => {
     <View style={[{ borderRadius: 0, backgroundColor: "white" }, style,]} />
   );
 };
-
-
-
-const textStyles = StyleSheet.create({
-  headingTitle: {
-    fontSize: 27,
-    letterSpacing: 0,
-    fontFamily: "DMSans-Bold",
-  },
-  headingSubtitle: {
-    fontSize: 12,
-    fontFamily: "DMSans-Regular",
-  },
-  selectedStation: {
-    fontSize: 16,
-    fontFamily: "DMSans-Regular",
-  }
-});
-
-const styles = StyleSheet.create({
-  container: {
-    gap: 12,
-  },
-  currentStation: {
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    borderColor: "hsl(0, 0%, 90%)",
-  },
-  mainContainer: {
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  illustrationContainer: {
-    width: 150,
-    height: 150,
-    padding: 45,
-    borderRadius: 120,
-    backgroundColor: "hsl(0, 0%, 95%)",
-  },
-  selectedStationContainer: {
-    width: "100%",
-    borderTopWidth: 1,
-    paddingVertical: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    borderColor: "hsl(0, 0%, 95%)",
-  }
-});

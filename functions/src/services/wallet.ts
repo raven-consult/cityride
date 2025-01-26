@@ -9,15 +9,12 @@ import { onDocumentCreated } from "firebase-functions/v2/firestore";
 
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
 
-import { isAuthorized } from "../utils";
+import { isAuthorized, firestore } from "../utils";
 import { InitializedTransaction, Transaction, UserTransaction, Wallet } from "../types";
 
 
 const kLastTransactionslimit = 10;
 const expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
-
-const firestore = admin.firestore();
-firestore.settings({ ignoreUndefinedProperties: true });
 
 
 export const createWallet = auth.user().onCreate((user) => {

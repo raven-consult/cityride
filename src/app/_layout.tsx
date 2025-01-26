@@ -14,6 +14,7 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 import { ExpoNotification } from "@/types";
 import useDMSans from "@/design/fonts/DM_Sans";
+import AppContextProvider from "@/context/AppContext";
 import { addNotification } from "@/services/notifications";
 
 const NOTIFICATION_RECEIVED_TASK = "notification-received";
@@ -27,7 +28,6 @@ Notifications.setNotificationHandler({
 });
 
 type NotificationReceivedTaskData = { notification: ExpoNotification };
-
 TaskManager.defineTask<NotificationReceivedTaskData>(NOTIFICATION_RECEIVED_TASK, async ({ data, error }) => {
   if (error) {
     console.error(error);
@@ -45,9 +45,7 @@ TaskManager.defineTask<NotificationReceivedTaskData>(NOTIFICATION_RECEIVED_TASK,
     });
   }
 });
-
 Notifications.registerTaskAsync(NOTIFICATION_RECEIVED_TASK);
-
 
 
 const RootLayout = (): JSX.Element => {
@@ -78,15 +76,23 @@ const RootLayout = (): JSX.Element => {
 
   return (
     <GestureHandlerRootView>
-      <Stack screenOptions={{
-        animation: "fade",
-        headerShown: false,
-        statusBarStyle: "dark",
-        contentStyle: { backgroundColor: "white" },
-      }}>
-        <Stack.Screen name="(app)" />
-        <Stack.Screen name="(onboarding)" />
-      </Stack>
+      <AppContextProvider>
+        <Stack
+          screenOptions={{
+            animation: "fade",
+            headerShown: false,
+            statusBarStyle: "dark",
+            statusBarTranslucent: true,
+            contentStyle: {
+              backgroundColor: "white"
+            },
+          }}
+        >
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(app)" />
+          <Stack.Screen name="(onboarding)" />
+        </Stack>
+      </AppContextProvider>
     </GestureHandlerRootView>
   );
 };

@@ -1,6 +1,6 @@
-import * as admin from 'firebase-admin';
+import * as admin from "firebase-admin";
 
-import stations from '../private/stations.geojson.json';
+import stations from "../private/stations.geojson.json";
 
 admin.initializeApp({ projectId: "cityride-dev" });
 
@@ -17,7 +17,7 @@ export interface Station {
 console.log(stations);
 const db = admin.firestore();
 
-const stationsCollection = db.collection('stations');
+const stationsCollection = db.collection("stations");
 
 stations.features.forEach(async (station: any) => {
   console.log(station);
