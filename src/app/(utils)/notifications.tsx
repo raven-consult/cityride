@@ -1,9 +1,10 @@
 import React from "react";
 import { Text, View, StyleSheet } from "react-native";
 
-import { formatDistance } from "date-fns";
-
 import { StatusBar } from "expo-status-bar";
+import * as ExpoNotification from "expo-notifications";
+
+import { formatDistance } from "date-fns";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS } from "react-native-reanimated";
 
@@ -13,6 +14,24 @@ import { getAllNotifications } from "@/services/notifications";
 
 const Notifications = (): JSX.Element => {
   const [notifications, setNotifications] = React.useState<INotification[]>([]);
+
+  React.useEffect(() => {
+    const sub = ExpoNotification.addNotificationReceivedListener((notification) => {
+      const { title, body } = notification.request.content;
+      setNotifications((prev) => [
+        {
+          date: new Date(),
+          title: title || "",
+          description: body || "",
+        },
+        ...prev,
+      ]);
+    });
+
+    return () => {
+      sub.remove();
+    };
+  }, []);
 
   React.useEffect(() => {
     (async () => {

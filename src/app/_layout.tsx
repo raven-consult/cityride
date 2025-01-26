@@ -37,10 +37,10 @@ TaskManager.defineTask<NotificationReceivedTaskData>(NOTIFICATION_RECEIVED_TASK,
   if (data) {
     const notification = data.notification as ExpoNotification;
     const sentTime = new Date(notification.sentTime);
-    const { title, message } = notification.data;
+    const { title, body } = notification.data;
     await addNotification({
       title,
-      description: message,
+      description: body,
       date: new Date(sentTime),
     });
   }
