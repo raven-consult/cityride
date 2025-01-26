@@ -33,6 +33,25 @@ export interface Transaction {
   type: "credit" | "debit";
 }
 
+export interface ExpoNotification {
+  sentTime: number;
+  data: {
+    title: string;
+    body: string;
+    message: string;
+    scopeKey: string;
+    channelId: string;
+    projectId: string;
+    experienceId: string;
+  };
+}
+
+export interface INotification {
+  date: Date;
+  title: string;
+  description: string;
+}
+
 export type Role = "passenger" | "driver";
 
 export interface DriverInfo {
