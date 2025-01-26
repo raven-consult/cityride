@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from "react-native";
 
 import { Dropdown } from "react-native-element-dropdown";
-import GoogleMapView, { Circle, Polyline, PROVIDER_GOOGLE, Marker as RNMarker } from "react-native-maps";
+import GoogleMapView, { Polyline, PROVIDER_GOOGLE, Marker as RNMarker } from "react-native-maps";
 
 import { Station } from "@/types";
 import { hasPlayServices } from "@/services/auth";
@@ -19,8 +19,8 @@ const MapView = (): JSX.Element => {
 
   const formatStations = React.useMemo(() => {
     return stations.map(station => ({
-      label: station.name,
       value: station.id,
+      label: station.name,
     }));
   }, [stations]);
 
@@ -31,32 +31,31 @@ const MapView = (): JSX.Element => {
     })();
   }, []);
 
-
   React.useEffect(() => {
     if (selectedRoute.start && selectedRoute.end) {
-      mapRef.current?.fitToCoordinates([
+      mapRef.current?.fitToCoordinates(
+        [
+          {
+            latitude: selectedRoute.start.coordinates.latitude,
+            longitude: selectedRoute.start.coordinates.longitude,
+          },
+          {
+            latitude: selectedRoute.end.coordinates.latitude,
+            longitude: selectedRoute.end.coordinates.longitude,
+          },
+        ],
         {
-          latitude: selectedRoute.start.coordinates.latitude,
-          longitude: selectedRoute.start.coordinates.longitude,
-        },
-        {
-          latitude: selectedRoute.end.coordinates.latitude,
-          longitude: selectedRoute.end.coordinates.longitude,
-        },
-      ], {
-        edgePadding: {
-          top: 150,
-          right: 100,
-          bottom: 100,
-          left: 150,
-        },
-      });
+          edgePadding: {
+            top: 150,
+            left: 150,
+            right: 100,
+            bottom: 100,
+          },
+        });
     }
   }, [selectedRoute])
 
   const onPressStation = (station: Station) => {
-    if (!mapRef.current) return;
-
     if (createRideMode) {
       // Toogle Start
       if (selectedRoute.start?.id === station.id) {
@@ -91,12 +90,13 @@ const MapView = (): JSX.Element => {
     } else {
       setCurrentStation(station);
 
+      if (!mapRef.current) return;
       mapRef.current?.animateCamera({
+        zoom: 16,
         center: {
           latitude: station.coordinates.latitude,
           longitude: station.coordinates.longitude
         },
-        zoom: 16,
       });
     }
   }
@@ -168,12 +168,10 @@ const MapView = (): JSX.Element => {
           paddingHorizontal: 12,
         }}>
           <Select
-            placeholder="Current Station"
-            data={formatStations}
             value={"Abuja"}
-            style={{
-              flex: 1,
-            }}
+            style={{ flex: 1 }}
+            data={formatStations}
+            placeholder="Current Station"
             onChange={(val) => {
               const station = stations.filter(station => station.id === val.value)[0];
               onPressStation(station);

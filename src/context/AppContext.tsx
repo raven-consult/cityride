@@ -22,16 +22,16 @@ interface AppContextProviderProps {
 
 const AppContextProvider = ({ children }: AppContextProviderProps) => {
   const rideState = useRideState();
+  const infoState = useInfoState();
   const stationState = useStationState();
   const createRideState = useCreateRideState();
-  const infoState = useInfoState();
 
   return (
     <AppContext.Provider value={{
       ...rideState,
+      ...infoState,
       ...stationState,
       ...createRideState,
-      ...infoState
     }}>
       {children}
     </AppContext.Provider>

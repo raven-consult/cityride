@@ -5,7 +5,6 @@ import { View, Text, StyleSheet, Pressable, Alert } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import * as Location from "expo-location";
-import { StatusBar } from "expo-status-bar";
 
 import LocationImg from "@/assets/images/static/location.svg";
 
@@ -34,10 +33,8 @@ const RequestLocation = (): JSX.Element => {
 
   return (
     <View style={styles.container}>
-      <StatusBar backgroundColor="white" translucent={false} />
       <View style={styles.mainContentContainer}>
         <View style={{ gap: 8 }}>
-
           <View style={{ alignItems: "center", flexDirection: "row", gap: 8 }}>
             <Image
               source={LocationImg}

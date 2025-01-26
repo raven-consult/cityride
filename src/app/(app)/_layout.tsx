@@ -17,12 +17,11 @@ import RideInfo from "@/components/RideInfo";
 import InfoSheet from "@/components/InfoSheet";
 import CreateRide from "@/components/CreateRide";
 import BottomTabBar from "@/components/BottomTabBar";
-import AppContextProvider from "@/context/AppContext";
 
 
 const Layout = (): JSX.Element => {
   return (
-    <AppContextProvider>
+    <>
       <Tabs
         screenOptions={{
           headerShown: false,
@@ -99,7 +98,6 @@ const Layout = (): JSX.Element => {
                   height: 32
                 }} />
               )
-
             }
           }}
         />
@@ -107,7 +105,7 @@ const Layout = (): JSX.Element => {
       <RideInfo />
       <InfoSheet />
       <CreateRide />
-    </AppContextProvider>
+    </>
   );
 };
 

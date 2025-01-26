@@ -28,7 +28,6 @@ Notifications.setNotificationHandler({
 });
 
 type NotificationReceivedTaskData = { notification: ExpoNotification };
-
 TaskManager.defineTask<NotificationReceivedTaskData>(NOTIFICATION_RECEIVED_TASK, async ({ data, error }) => {
   if (error) {
     console.error(error);
@@ -46,9 +45,7 @@ TaskManager.defineTask<NotificationReceivedTaskData>(NOTIFICATION_RECEIVED_TASK,
     });
   }
 });
-
 Notifications.registerTaskAsync(NOTIFICATION_RECEIVED_TASK);
-
 
 
 const RootLayout = (): JSX.Element => {
@@ -84,25 +81,16 @@ const RootLayout = (): JSX.Element => {
           screenOptions={{
             animation: "fade",
             headerShown: false,
+            statusBarStyle: "dark",
+            statusBarTranslucent: true,
             contentStyle: {
               backgroundColor: "white"
             },
           }}
         >
-          <Stack.Screen
-            name="(app)"
-            options={{
-              statusBarStyle: "dark",
-              statusBarTranslucent: true,
-            }}
-          />
-          <Stack.Screen
-            name="(onboarding)"
-            options={{
-              statusBarStyle: "dark",
-              statusBarTranslucent: true,
-            }}
-          />
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(app)" />
+          <Stack.Screen name="(onboarding)" />
         </Stack>
       </AppContextProvider>
     </GestureHandlerRootView>
