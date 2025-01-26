@@ -30,6 +30,29 @@ const AppBar = (): JSX.Element => {
     }
   }
 
+  const greetingText = React.useMemo(() => {
+    const date = new Date();
+    const hours = date.getHours();
+    if (hours >= 0 && hours < 12) {
+      return "Good Morning,";
+    } else if (hours >= 12 && hours < 18) {
+      return "Good Afternoon,";
+    } else {
+      return "Good Evening,";
+    }
+   }, []);
+
+  const driverArrival = React.useMemo(() => {
+    const currentTimestamp = Date.now();
+    const arrivalTimestamp = pendingRide?.metadata.driverArrivalTimestamp || NaN;
+    const arrivalDelta = arrivalTimestamp - currentTimestamp;
+
+    if (isNaN(arrivalDelta)) return "N/A";
+
+    const arrival = Math.round(arrivalDelta / 1000 / 60);
+    return `${arrival} mins`;
+  }, [pendingRide]);
+
   React.useEffect(() => {
     const subscriber = auth()
       .onAuthStateChanged((user: FirebaseAuthTypes.User | null) => {
@@ -57,7 +80,7 @@ const AppBar = (): JSX.Element => {
       <View style={styles.mainContainer}>
         <View style={styles.textContainer}>
           <View>
-            <Text style={textStyles.greetingText}>Good Morning,</Text>
+            <Text style={textStyles.greetingText}>{greetingText}</Text>
             <Text style={textStyles.mainText}>{currentUser?.displayName}</Text>
           </View>
 
@@ -70,7 +93,7 @@ const AppBar = (): JSX.Element => {
         </View>
         {pendingRide && (
           <Pressable onPress={onPressPendingRide} style={styles.bannerContainer}>
-            <Text style={textStyles.bannerText}>You have a ride scheduled for {pendingRide.metadata.driverArrival} mins from now</Text>
+            <Text style={textStyles.bannerText}>You have a ride scheduled for {driverArrival} from now</Text>
           </Pressable>
         )}
       </View>
