@@ -1,36 +1,25 @@
 import React from "react";
 import { Text, View, StyleSheet } from "react-native";
 
-import { formatDistance } from "date-fns"
+import { formatDistance } from "date-fns";
 
+import { StatusBar } from "expo-status-bar";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS } from "react-native-reanimated";
 
-import { StatusBar } from "expo-status-bar";
-
-
-interface INotification {
-  date: Date;
-  title: string;
-  description: string;
-}
+import { INotification } from "@/types";
+import { getAllNotifications } from "@/services/notifications";
 
 
 const Notifications = (): JSX.Element => {
-  const items = [
-    {
-      date: new Date(),
-      title: "Ride Scheduled",
-      description: "You have a ride scheduled for 10 mins from now",
-    },
-    {
-      title: "Ride Cancelled",
-      description: "Your ride has been cancelled",
-      date: new Date(),
-    }
-  ] satisfies INotification[];
+  const [notifications, setNotifications] = React.useState<INotification[]>([]);
 
-  const [notifications, setNotifications] = React.useState<INotification[]>(items);
+  React.useEffect(() => {
+    (async () => {
+      const notification = await getAllNotifications();
+      setNotifications(notification);
+    })
+  }, []);
 
   return (
     <View style={styles.container}>
