@@ -75,6 +75,7 @@ export const createRide = onRequest(async (req, res) => {
       end: endStationData,
       start: startStationData,
     },
+    status: "waiting",
     price,
     metadata: {
       driverId: driver,

@@ -38,6 +38,8 @@ export type Passengers = Record<string, {
   verified: boolean;
 }>
 
+export type RideStatus = "waiting" | "completed";
+
 export interface Ride {
   id?: string;
   price: number;
@@ -45,6 +47,7 @@ export interface Ride {
     start: Station;
     end: Station;
   }
+  status: RideStatus;
   metadata: {
     driverId: string;
     maxPassengers: number;

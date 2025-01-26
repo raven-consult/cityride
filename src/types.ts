@@ -69,6 +69,8 @@ export interface UserData {
   driverInfo?: DriverInfo;
 }
 
+export type RideStatus = "waiting" | "completed";
+
 export interface Ride {
   id: string;
   price: number;
@@ -76,10 +78,11 @@ export interface Ride {
     start: Station;
     end: Station;
   }
+  status: RideStatus;
   metadata: {
     driverId: string;
-    driverArrival: number;
     maxPassengers: number;
+    driverArrivalTimestamp: number;
   }
 }
 
