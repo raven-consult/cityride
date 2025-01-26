@@ -4,10 +4,10 @@ import { getUrl } from "@/utils";
 import { Transaction, Wallet } from "@/types";
 
 
-export const getLastTransactions = async (userId: string): Promise<Transaction[]> => {
+export const getLastTransactions = async (uid: string): Promise<Transaction[]> => {
   const url = getUrl("wallet-getLastTransactions");
   const authToken = await auth().currentUser?.getIdToken();
-  const req = { userId };
+  const req = { uid };
 
   const res = await fetch(url, {
     method: "POST",
@@ -29,10 +29,10 @@ export const getLastTransactions = async (userId: string): Promise<Transaction[]
 };
 
 
-export const getWallet = async (userId: string): Promise<Wallet> => {
+export const getWallet = async (uid: string): Promise<Wallet> => {
   const url = getUrl("wallet-getWallet");
   const authToken = await auth().currentUser?.getIdToken();
-  const req = { userId };
+  const req = { uid };
 
   const res = await fetch(url, {
     method: "POST",
