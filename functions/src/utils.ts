@@ -2,6 +2,12 @@ import * as admin from "firebase-admin";
 import { Request, Response } from "express";
 import { UserRecord } from "firebase-admin/auth";
 
+
+const firestore = admin.firestore();
+firestore.settings({ ignoreUndefinedProperties: true });
+
+export { firestore };
+
 export const isAuthorized = async (req: Request, res: Response): Promise<UserRecord | null> => {
   const isInEmulator = process.env.FUNCTIONS_EMULATOR === "true";
   if (isInEmulator) {

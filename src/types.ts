@@ -6,8 +6,11 @@ export interface Coordinate {
 export interface Info {
   title: string;
   description: string;
-  illustration: string;
-  action?: () => void;
+  illustration?: string;
+  action?: {
+    text: string;
+    onPress: () => void;
+  }
 }
 
 export interface Station {
@@ -17,17 +20,56 @@ export interface Station {
   coordinates: Coordinate;
 }
 
+export interface Wallet {
+  id: string;
+  balance: number;
+}
+
+export interface Transaction {
+  id: string;
+  title: string;
+  sender: string;
+  amount: number;
+  timestamp: Date;
+  receiver: string;
+  comment?: string;
+  type: "credit" | "debit";
+}
+
+export interface ExpoNotification {
+  sentTime: number;
+  data: {
+    title: string;
+    body: string;
+    message: string;
+    scopeKey: string;
+    channelId: string;
+    projectId: string;
+    experienceId: string;
+  };
+}
+
+export interface INotification {
+  date: Date;
+  title: string;
+  description: string;
+}
+
 export type Role = "passenger" | "driver";
+
+export interface DriverInfo {
+  carNumber: string;
+  maxPassengers: number;
+}
 
 export interface UserData {
   role: Role;
   email: string;
   displayName: string;
-  driverInfo?: {
-    carNumber: string;
-    maxPassengers: number;
-  };
+  driverInfo?: DriverInfo;
 }
+
+export type RideStatus = "waiting" | "completed";
 
 export interface Ride {
   id: string;
@@ -36,10 +78,11 @@ export interface Ride {
     start: Station;
     end: Station;
   }
+  status: RideStatus;
   metadata: {
     driverId: string;
-    driverArrival: number;
     maxPassengers: number;
+    driverArrivalTimestamp: number;
   }
 }
 

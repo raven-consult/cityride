@@ -28,7 +28,6 @@ const FundWallet = (): JSX.Element => {
     const subscriber = auth()
       .onAuthStateChanged((user: FirebaseAuthTypes.User | null) => {
         if (user) {
-          console.log(user);
           setCurrentUser(user);
         }
       });

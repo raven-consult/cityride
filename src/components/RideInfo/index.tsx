@@ -1,13 +1,15 @@
 import React from "react";
 
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
+
+import { useRouter } from "expo-router";
 
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import RNBottomSheet, { BottomSheetBackgroundProps, BottomSheetView } from "@gorhom/bottom-sheet";
 
 import { Info } from "@/types";
 import { useAppContext } from "@/context/AppContext";
-import { boardRide, userIsPassengerOfRide } from "@/services/rides";
+import { boardRide, passengerCancelRide } from "@/services/rides";
 
 import DriverBottomBar from "./_components/DriverBotttomBar";
 import PassengerBottomBar from "./_components/PassengerBotttomBar";
@@ -16,13 +18,13 @@ import RoadPathImg from "@/assets/images/static/road-path.svg";
 
 
 const RideInfo = (): JSX.Element => {
-  const { setInfo } = useAppContext();
+  const router = useRouter();
+  const { setInfo, setRideCode } = useAppContext();
   const { ride, setCurrentRide } = useAppContext();
   const { pendingRide, setPendingRide } = useAppContext();
   const bottomSheetRef = React.useRef<RNBottomSheet>(null);
   const snapPoints = React.useMemo(() => ["15%", "30%"], []);
 
-  const [userIsPassenger, setUserIsPassenger] = React.useState<boolean | null>(null);
   const [currentUser, setCurrentUser] = React.useState<FirebaseAuthTypes.User | null>(null);
 
   React.useEffect(() => {
@@ -33,11 +35,8 @@ const RideInfo = (): JSX.Element => {
     return sub;
   }, []);
 
-  React.useEffect(() => {
-    (async () => {
-      if (!ride || !currentUser) return false;
-      setUserIsPassenger(await userIsPassengerOfRide(ride.id, currentUser.uid));
-    })();
+  const userIsDriver = React.useMemo(() => {
+    return ride?.metadata.driverId == currentUser?.uid;
   }, [ride, currentUser]);
 
   React.useEffect(() => {
@@ -53,24 +52,76 @@ const RideInfo = (): JSX.Element => {
   const onPressBoardRide = async () => {
     if (!ride || !currentUser) return;
 
-    await boardRide(ride.id, currentUser.uid);
-    setPendingRide(ride);
+    try {
+      const rideCode = await boardRide(ride.id, currentUser.uid);
+      setRideCode(rideCode);
+      setPendingRide(ride);
+      setCurrentRide(null);
+      setInfo({
+        title: "Ride Boarded",
+        illustration: RoadPathImg,
+        description: "Your ride has been scheduled. You will be notified when your arrived has arrived.",
+      } as Info);
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
+  };
 
-    clearRide();
+  const onPressCancelRide = () => new Promise<void>((resolve) => {
+    if (!ride || !currentUser) return;
+    Alert.alert("Cancel Ride", "Are you sure you want to cancel this ride", [
+      {
+        text: "Cancel Ride",
+        onPress: async () => {
+          try {
+            await passengerCancelRide(ride.id, currentUser?.uid);
+            setPendingRide(null);
+            setCurrentRide(null);
+            setInfo({
+              title: "Ride Cancelled",
+              description: "Your ride has been cancelled. The driver will be notified",
+            } as Info);
+            resolve();
+          } catch (e) {
+            console.error(e);
+            throw e;
+          }
+        },
+      },
+      {
+        text: "Cancel",
+        onPress: () => {
+          console.log("Dismissed");
+        }
+      }
+    ]);
+  });
 
-    setInfo({
-      title: "Ride Boarded",
-      illustration: RoadPathImg,
-      description: "Your ride has been scheduled. You will be notified when your arrived has arrived.",
-    } as Info);
+  const onPressViewTicket = () => {
+    router.push("/(utils)/ride-ticket");
+  }
+
+  const onPressScanQRCode = () => {
+    router.push("/(utils)/capture-qrcode");
   }
 
   const isPendingRide = React.useMemo(() => {
     return pendingRide?.id === ride?.id;
   }, [ride, pendingRide]);
 
+  const hasPendingRide = React.useMemo(() => {
+    return !!pendingRide;
+  }, [pendingRide]);
+
   const driverArrival = React.useMemo(() => {
-    const arrival = ride?.metadata.driverArrival;
+    const currentTimestamp = Date.now();
+    const arrivalTimestamp = ride?.metadata.driverArrivalTimestamp || NaN;
+    const arrivalDelta = arrivalTimestamp - currentTimestamp;
+
+    if (isNaN(arrivalDelta)) return "N/A";
+
+    const arrival = Math.round(arrivalDelta / 1000 / 60);
     return `${arrival} mins`;
   }, [ride]);
 
@@ -124,16 +175,20 @@ const RideInfo = (): JSX.Element => {
           </View>
         </View>
 
-        {(userIsPassenger != null && userIsPassenger) ? (
-          <PassengerBottomBar
-            clearRide={clearRide}
-            isPendingRide={isPendingRide}
-            onPressBoardRide={onPressBoardRide}
-          />
-        ) : (
+        {userIsDriver ? (
           <DriverBottomBar
             clearRide={clearRide}
             isPendingRide={isPendingRide}
+            onPressScanQRCode={onPressScanQRCode}
+          />
+        ) : (
+          <PassengerBottomBar
+            clearRide={clearRide}
+            isPendingRide={isPendingRide}
+            hasPendingRide={hasPendingRide}
+            onPressBoardRide={onPressBoardRide}
+            onPressViewTicket={onPressViewTicket}
+            onPressCancelRide={onPressCancelRide}
           />
         )}
       </BottomSheetView>
@@ -182,6 +237,7 @@ const textStyles = StyleSheet.create({
 const styles = StyleSheet.create({
   container: {
     gap: 8,
+    paddingBottom: 8,
     borderTopWidth: 1,
     borderColor: "hsl(0, 0%, 90%)",
   },

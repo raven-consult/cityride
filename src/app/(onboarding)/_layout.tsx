@@ -9,16 +9,13 @@ import ExtendedAppBar from "@/components/ExtendedAppBar";
 const Layout = (): JSX.Element => {
   return (
     <Stack screenOptions={{
-      contentStyle: {
-        backgroundColor: "white",
-      },
-      statusBarStyle: "dark",
+      statusBarTranslucent: true,
+      contentStyle: { backgroundColor: "white" },
     }}>
       <Stack.Screen
         name="index"
         options={{
           headerShown: false,
-          statusBarTranslucent: true,
         }}
       />
       <Stack.Screen
@@ -41,6 +38,7 @@ const Layout = (): JSX.Element => {
         name="location"
         options={{
           title: "Location Access",
+          statusBarTranslucent: true,
           header: ({ navigation, route, options }) => {
             const title = getHeaderTitle(options, route.name)
             return (
@@ -54,7 +52,7 @@ const Layout = (): JSX.Element => {
         }}
       />
     </Stack>
-  )
+  );
 };
 
 

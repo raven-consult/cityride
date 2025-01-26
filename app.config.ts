@@ -56,15 +56,11 @@ export default () => {
           }
         ],
         [
-          "expo-splash-screen",
+          "react-native-vision-camera",
           {
-            "image": "./src/assets/images/branding/splash.png",
-            "imageWidth": 200,
-            "resizeMode": "cover",
-            "backgroundColor": "#ffffff"
+            "enableCodeScanner": true
           }
-        ],
-        "react-native-vision-camera",
+        ]
       ],
       "extra": {
         "eas": {
@@ -77,5 +73,4 @@ export default () => {
       }
     } satisfies ExpoConfig
   };
-
 }

@@ -8,14 +8,11 @@ import { isAuthorized } from "../utils";
 import { PassengerPayDriverForRide } from "./wallet";
 import { MapResponse, Passengers, Ride, Station, UserData } from "../types";
 
+import { firestore } from "../utils";
+
 
 // const kAllowedWaitTimeMins = 30;
 const MAPS_API_KEY = process.env.MAPS_API_KEY || "";
-
-export const database = admin.firestore();
-database.settings({
-  ignoreUndefinedProperties: true,
-});
 
 const expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
 
@@ -34,7 +31,7 @@ export const createRide = onRequest(async (req, res) => {
   const { driver, startStation, endStation, price } = (req.body as CreateRideRequest);
 
   // Check if driver is driver
-  const driverData = await database.collection("users").doc(driver).get();
+  const driverData = await firestore.collection("users").doc(driver).get();
   if (!driverData.exists) {
     logger.error("A User tried to create with ride with invalid driver", driver);
     res.status(400).send("Driver does not exist");
@@ -49,7 +46,7 @@ export const createRide = onRequest(async (req, res) => {
   }
 
   // Check if start is bus stops
-  const startStationDoc = await database.collection("stations").doc(startStation).get();
+  const startStationDoc = await firestore.collection("stations").doc(startStation).get();
   if (!startStationDoc.exists) {
     logger.error("A User tried to create with ride with invalid start point", driver);
     res.status(400).send("Start point does not exist");
@@ -58,7 +55,7 @@ export const createRide = onRequest(async (req, res) => {
   const startStationData = { ...startStationDoc.data(), id: startStationDoc.id } as Station;
 
   // Check if end is bus stops
-  const endStationDoc = await database.collection("stations").doc(endStation).get();
+  const endStationDoc = await firestore.collection("stations").doc(endStation).get();
   if (!endStationDoc.exists) {
     res.status(400).send("End point does not exist");
     logger.error("A User tried to create with ride with invalid destination point", driver);
@@ -71,13 +68,14 @@ export const createRide = onRequest(async (req, res) => {
   const timeMins = 5;
   const driverArrivalTimestamp = Date.now() + timeMins * 60 * 1000;
 
-  const rideId = database.collection("rides").doc().id;
+  const rideId = firestore.collection("rides").doc().id;
   const ride: Ride = {
     id: rideId,
     itenary: {
       end: endStationData,
       start: startStationData,
     },
+    status: "waiting",
     price,
     metadata: {
       driverId: driver,
@@ -86,7 +84,7 @@ export const createRide = onRequest(async (req, res) => {
     }
   };
 
-  await database.collection("rides").doc(rideId).set(ride);
+  await firestore.collection("rides").doc(rideId).set(ride);
   await admin.database().ref(`/rides/${rideId}/passengers`).set({});
 
   res.status(200).send(ride);
@@ -104,7 +102,7 @@ export const getAvailableRides = onRequest(async (req, res) => {
 
   const { stationId } = (req.body as GetAvailableRidesRequest);
 
-  const rides = await database
+  const rides = await firestore
     .collection("rides")
     .where("itenary.start.id", "==", stationId)
     .get();
@@ -116,11 +114,13 @@ export const getAvailableRides = onRequest(async (req, res) => {
   res.status(200).send(availableRides);
 });
 
-function checkRideIsFull(ride: Ride, passengers: Passengers) {
+function checkRideIsFull(ride: Ride, passengers: Passengers | undefined) {
+  if (!passengers) return false;
   return ride.metadata.maxPassengers === Object.keys(passengers).length;
 }
 
-function checkUserNotInRide(passengers: Passengers, userId: string) {
+function checkUserNotInRide(passengers: Passengers | undefined, userId: string) {
+  if (!passengers) return false;
   return !Object.keys(passengers).includes(userId);
 }
 
@@ -129,7 +129,8 @@ function checkUserHasNoPendingRide(userId: string): boolean {
 }
 
 function checkUserHasEnoughBalance(userId: string): boolean {
-  throw new Error("Not implemented");
+  return true;
+  // throw new Error("Not implemented");
 }
 
 /**
@@ -144,7 +145,7 @@ export const boardRide = onRequest(async (req, res) => {
 
   const { rideId, passengerId } = req.body;
 
-  const rideRef = database.collection("rides").doc(rideId);
+  const rideRef = firestore.collection("rides").doc(rideId);
   const ride = (await rideRef.get()).data() as Ride;
 
   const rideRtdbRef = admin.database().ref(`/rides/${rideId}`);
@@ -162,7 +163,7 @@ export const boardRide = onRequest(async (req, res) => {
   }
 
   const isUserInRide = checkUserNotInRide(passengers, passengerId);
-  if (!isUserInRide) {
+  if (isUserInRide) {
     res.status(400).send("User is already in the ride");
     return;
   }
@@ -223,6 +224,67 @@ export const boardRide = onRequest(async (req, res) => {
   // [END] Send notification to driver
 
   res.status(200).send(passengerCode);
+});
+
+
+export const passengerCancelRide = onRequest(async (req, res) => {
+  if (!await isAuthorized(req, res)) return;
+
+  const { rideId, passengerId } = req.body;
+
+  const passengersRef = admin.database().ref(`/rides/${rideId}/passengers`);
+  const passengersData = await passengersRef.get();
+
+  if (!passengersData.exists()) {
+    res.status(400).send("No passengers yet registered");
+    return;
+  }
+
+  const passengers = passengersData.toJSON() as Passengers;
+  if (!passengers) {
+    res.status(400).send("No passengers yet registered");
+    return;
+  }
+
+  if (!Object.keys(passengers).includes(passengerId)) {
+    res.status(400).send("Passenger not found");
+    return;
+  }
+
+  await passengersRef.child(`${passengerId}`).remove();
+
+  // Notify driver
+  const rideRef = await firestore.collection("rides").doc(rideId).get();
+  const ride = { ...rideRef.data(), id: rideRef.id } as Ride;
+
+  const driverNotificationToken = await admin
+    .database()
+    .ref(`/users/${ride.metadata.driverId}/notificationToken`)
+    .get();
+
+  if (!driverNotificationToken.exists) {
+    logger.error(`Could not send notification to driver: ${ride.metadata.driverId} of ride: ${ride.id} because notification token does not exist`);
+  }
+
+  const notificationToken = driverNotificationToken.val();
+  if (!Expo.isExpoPushToken(notificationToken)) {
+    logger.error(`Could not send notification to driver: ${ride.metadata.driverId} of ride: ${ride.id}`);
+  }
+
+  const message = {
+    sound: "default",
+    to: notificationToken,
+    title: "Passenger Cancelled",
+    body: "A passenger has cancelled the ride",
+  } as ExpoPushMessage;
+
+  try {
+    await expo.sendPushNotificationsAsync([message]);
+  } catch (error) {
+    logger.error(error);
+  }
+
+  res.status(200).send("Passenger removed");
 });
 
 // TODO: Add comments
@@ -332,8 +394,13 @@ export const userIsPassengerOfRide = onRequest(async (req, res) => {
 
   const rideRtdbRef = admin.database().ref(`/rides/${rideId}`);
 
-  const passengers = (await rideRtdbRef.child("passengers").get()).toJSON() as Passengers;
-  const isPassenger = Object.keys(passengers).includes(userId);
+  const passengers = await rideRtdbRef.child("passengers").get();
+
+  let isPassenger = false;
+
+  if (passengers.exists()) {
+    isPassenger = Object.keys(passengers).includes(userId);
+  }
 
   res.status(200).send({ isPassenger });
 });
@@ -349,7 +416,7 @@ export const sendArrivalNotification = onRequest(async (req, res) => {
 
   const { rideId } = req.body;
 
-  const rideRef = await database.collection("rides").doc(rideId).get();
+  const rideRef = await firestore.collection("rides").doc(rideId).get();
   const ride = { ...rideRef.data(), id: rideRef.id } as Ride;
 
   if (!ride) {

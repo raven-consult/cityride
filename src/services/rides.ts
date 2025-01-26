@@ -19,6 +19,7 @@ export const userIsPassengerOfRide = async (rideId: string, userId: string): Pro
 
   if (!res.ok) {
     const text = await res.text();
+    console.log("Error", text);
     throw new Error(text);
   }
 
@@ -99,8 +100,69 @@ export const boardRide = async (rideId: string, passengerId: string) => {
 
   if (!res.ok) {
     const text = await res.text();
+    console.log("Error", text);
     throw new Error(text);
   }
 
-  return res.json();
-} 
+  const data = await res.text();
+  return data;
+}
+
+export const passengerCancelRide = async (rideId: string, passengerId: string) => {
+  const url = getUrl("rideShare-passengerCancelRide");
+  const authToken = await auth().currentUser?.getIdToken();
+
+  const req = { rideId, passengerId } as { rideId: string, passengerId: string };
+
+  const res = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(req),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.log("Error", text);
+    throw new Error(text);
+  }
+
+  const data = await res.text();
+  return data;
+}
+
+type ConfirmRideResponse = "success" | "error";
+
+export const confirmRide = async (rideId: string, passengerCode: string): Promise<ConfirmRideResponse> => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve("success");
+    }, 2000);
+  });
+
+  const url = getUrl("rideShare-confirmRide");
+  const authToken = await auth().currentUser?.getIdToken();
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`
+    },
+    body: JSON.stringify({
+      rideId,
+      passengerCode,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.log("Error", text);
+    throw new Error(text);
+  }
+
+  const data = await res.text();
+  return data as ConfirmRideResponse;
+}

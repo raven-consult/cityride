@@ -1,4 +1,5 @@
 import React from "react";
+import { Easing } from "react-native";
 
 import { Image } from "expo-image";
 import { Tabs } from "expo-router";
@@ -16,13 +17,32 @@ import RideInfo from "@/components/RideInfo";
 import InfoSheet from "@/components/InfoSheet";
 import CreateRide from "@/components/CreateRide";
 import BottomTabBar from "@/components/BottomTabBar";
-import AppContextProvider from "@/context/AppContext";
 
 
 const Layout = (): JSX.Element => {
   return (
-    <AppContextProvider>
-      <Tabs screenOptions={{ headerShown: false }} tabBar={(props) => <BottomTabBar {...props} />}>
+    <>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          transitionSpec: {
+            animation: "timing",
+            config: {
+              duration: 150,
+              easing: Easing.inOut(Easing.ease),
+            },
+          },
+          sceneStyleInterpolator: ({ current }) => ({
+            sceneStyle: {
+              opacity: current.progress.interpolate({
+                inputRange: [-1, 0, 1],
+                outputRange: [0, 1, 0],
+              }),
+            },
+          }),
+        }}
+        tabBar={(props) => <BottomTabBar {...props} />}
+      >
         <Tabs.Screen
           name="discover/index"
           options={{
@@ -78,7 +98,6 @@ const Layout = (): JSX.Element => {
                   height: 32
                 }} />
               )
-
             }
           }}
         />
@@ -86,7 +105,7 @@ const Layout = (): JSX.Element => {
       <RideInfo />
       <InfoSheet />
       <CreateRide />
-    </AppContextProvider>
+    </>
   );
 };
 

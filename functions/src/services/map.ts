@@ -21,7 +21,7 @@ export const getRoutes = onRequest(async (req, res) => {
   if (!start || !end) {
     throw new HttpsError("invalid-argument", "Invalid request data");
   }
-  
+
   const inputString = `${JSON.stringify(start)}:${JSON.stringify(end)}`;
   const hash = crypto.createHash("sha256").update(inputString).digest("hex");
 
@@ -71,8 +71,6 @@ const getGMapsRoutes = async (start: Coordinate, end: Coordinate): Promise<MapRe
         }
       }
     },
-    travelMode: "DRIVE",
-    routingPreference: "TRAFFIC_AWARE",
     polylineEncoding: "GEO_JSON_LINESTRING",
     polylineQuality: "HIGH_QUALITY",
     computeAlternativeRoutes: false,

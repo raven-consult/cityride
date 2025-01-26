@@ -9,17 +9,26 @@ import CloseIcon from "@/assets/icons/close.svg";
 interface PassengerBottomBarProps {
   clearRide: () => void;
   isPendingRide: boolean;
+  hasPendingRide: boolean;
+  onPressViewTicket: () => void;
   onPressBoardRide: () => Promise<void>;
+  onPressCancelRide: () => Promise<void>;
 }
 
-const PassengerBottomBar = ({ isPendingRide, clearRide, onPressBoardRide }: PassengerBottomBarProps): JSX.Element => {
+const PassengerBottomBar = ({ isPendingRide, hasPendingRide, clearRide, onPressViewTicket, onPressBoardRide, onPressCancelRide }: PassengerBottomBarProps): JSX.Element => {
   const [loading, setLoading] = React.useState<string>("");
 
   const _onPressBoardRide = async () => {
     setLoading("boardRide");
     await onPressBoardRide();
     setLoading("");
-  };
+  }
+
+  const _onPressCancelRide = async () => {
+    setLoading("cancelRide");
+    await onPressCancelRide();
+    setLoading("");
+  }
 
   return (
     <View style={styles.ctaSection}>
@@ -36,22 +45,29 @@ const PassengerBottomBar = ({ isPendingRide, clearRide, onPressBoardRide }: Pass
       {isPendingRide ? (
         <>
           <Pressable
-            // onPress={boardRide}
+            onPress={onPressViewTicket}
             style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
             <Text style={textStyles.boardRideText}>View Ticket</Text>
           </Pressable>
           <Pressable
-            // onPress={boardRide}
+            onPress={_onPressCancelRide}
             style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
-            <Text style={textStyles.boardRideText}>Cancel Ride</Text>
+            {loading === "boardRide" ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text style={textStyles.boardRideText}>Cancel Ride</Text>
+            )}
           </Pressable>
         </>
       ) : (
         <Pressable
+          disabled={hasPendingRide}
           onPress={_onPressBoardRide}
-          style={{ borderRadius: 8, flex: 1, padding: 16, alignItems: "center", backgroundColor: "black" }}>
+          style={[styles.mainButton, { backgroundColor: hasPendingRide ? "hsl(0, 0%, 50%)" : "black" }]}>
           {loading === "boardRide" ? (
-            <ActivityIndicator color="black" />
+            <ActivityIndicator color="white" />
+          ) : hasPendingRide ? (
+            <Text style={textStyles.boardRideText}>You have a pending ride</Text>
           ) : (
             <Text style={textStyles.boardRideText}>Board Ride</Text>
           )}
@@ -123,4 +139,10 @@ const styles = StyleSheet.create({
     borderRightWidth: 0.7,
     borderColor: "hsl(0, 0%, 90%)",
   },
+  mainButton: {
+    flex: 1,
+    padding: 16,
+    borderRadius: 8,
+    alignItems: "center",
+  }
 });

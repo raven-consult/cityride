@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from "react-native";
 
 import { Dropdown } from "react-native-element-dropdown";
-import GoogleMapView, { PROVIDER_GOOGLE, Marker as RNMarker } from "react-native-maps";
+import GoogleMapView, { Polyline, PROVIDER_GOOGLE, Marker as RNMarker } from "react-native-maps";
 
 import { Station } from "@/types";
 import { hasPlayServices } from "@/services/auth";
@@ -19,8 +19,8 @@ const MapView = (): JSX.Element => {
 
   const formatStations = React.useMemo(() => {
     return stations.map(station => ({
-      label: station.name,
       value: station.id,
+      label: station.name,
     }));
   }, [stations]);
 
@@ -31,18 +31,74 @@ const MapView = (): JSX.Element => {
     })();
   }, []);
 
+  React.useEffect(() => {
+    if (selectedRoute.start && selectedRoute.end) {
+      mapRef.current?.fitToCoordinates(
+        [
+          {
+            latitude: selectedRoute.start.coordinates.latitude,
+            longitude: selectedRoute.start.coordinates.longitude,
+          },
+          {
+            latitude: selectedRoute.end.coordinates.latitude,
+            longitude: selectedRoute.end.coordinates.longitude,
+          },
+        ],
+        {
+          edgePadding: {
+            top: 150,
+            left: 150,
+            right: 100,
+            bottom: 100,
+          },
+        });
+    }
+  }, [selectedRoute])
+
   const onPressStation = (station: Station) => {
-    setCurrentStation(station);
+    if (createRideMode) {
+      // Toogle Start
+      if (selectedRoute.start?.id === station.id) {
+        setSelectedRoute({
+          ...selectedRoute,
+          start: null,
+        });
+        setStations([...stations, station]);
 
-    if (!mapRef.current) return;
+        // Toogle End
+      } else if (selectedRoute.end?.id === station.id) {
+        setSelectedRoute({
+          ...selectedRoute,
+          end: null,
+        });
+        setStations([...stations, station]);
 
-    mapRef.current?.animateCamera({
-      center: {
-        latitude: station.coordinates.latitude,
-        longitude: station.coordinates.longitude
-      },
-      zoom: 16,
-    });
+        // Select Start
+      } else if (selectedRoute.start == null) {
+        setSelectedRoute({
+          ...selectedRoute,
+          start: station,
+        });
+
+        // Select End
+      } else if (selectedRoute.end == null) {
+        setSelectedRoute({
+          ...selectedRoute,
+          end: station,
+        });
+      }
+    } else {
+      setCurrentStation(station);
+
+      if (!mapRef.current) return;
+      mapRef.current?.animateCamera({
+        zoom: 16,
+        center: {
+          latitude: station.coordinates.latitude,
+          longitude: station.coordinates.longitude
+        },
+      });
+    }
   }
 
   if (!hasPlayServices()) {
@@ -53,7 +109,7 @@ const MapView = (): JSX.Element => {
           gap: 8,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "white",
+          backgroundColor: "hsl(0, 0%, 70%)",
         }
       ]}>
 
@@ -112,12 +168,10 @@ const MapView = (): JSX.Element => {
           paddingHorizontal: 12,
         }}>
           <Select
-            placeholder="Current Station"
-            data={formatStations}
             value={"Abuja"}
-            style={{
-              flex: 1,
-            }}
+            style={{ flex: 1 }}
+            data={formatStations}
+            placeholder="Current Station"
             onChange={(val) => {
               const station = stations.filter(station => station.id === val.value)[0];
               onPressStation(station);
@@ -137,13 +191,16 @@ const MapView = (): JSX.Element => {
         provider={PROVIDER_GOOGLE}
         // customMapStyle={mapStyling}
         showsMyLocationButton={false}
-        // googleMapId="b50315943f641580"
-        initialRegion={{
-          latitude: 6.5244,
-          longitude: 3.3792,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+        initialCamera={{
+          center: {
+            latitude: 6.5244,
+            longitude: 3.3792,
+          },
+          pitch: 0,
+          heading: 0,
+          zoom: 15,
         }}
+      // googleMapId="b50315943f641580"
       >
         {stations && stations.map((station, index) => (
           <RNMarker
@@ -155,6 +212,22 @@ const MapView = (): JSX.Element => {
             }}
           />
         ))}
+        {(selectedRoute.start && selectedRoute.end) && (
+          <Polyline
+            strokeWidth={4}
+            strokeColor="hsl(0, 0%, 30%)"
+            coordinates={[
+              {
+                latitude: selectedRoute.start.coordinates.latitude,
+                longitude: selectedRoute.start.coordinates.longitude,
+              },
+              {
+                latitude: selectedRoute.end.coordinates.latitude,
+                longitude: selectedRoute.end.coordinates.longitude,
+              },
+            ]}
+          />
+        )}
       </GoogleMapView>
     );
   }

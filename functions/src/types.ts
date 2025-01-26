@@ -1,3 +1,6 @@
+import * as admin from "firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
+
 export interface Coordinate {
   latitude: number;
   longitude: number;
@@ -35,6 +38,8 @@ export type Passengers = Record<string, {
   verified: boolean;
 }>
 
+export type RideStatus = "waiting" | "completed";
+
 export interface Ride {
   id?: string;
   price: number;
@@ -42,11 +47,38 @@ export interface Ride {
     start: Station;
     end: Station;
   }
+  status: RideStatus;
   metadata: {
     driverId: string;
     maxPassengers: number;
     driverArrivalTimestamp: number;
   }
+}
+
+export interface InitializedTransaction {
+  sender: string;
+  initialized: boolean;
+  date: typeof admin.database.ServerValue.TIMESTAMP;
+}
+
+export interface Wallet {
+  id: string;
+  balance: number;
+}
+
+export interface Transaction {
+  id?: string;
+  title: string;
+  sender: string;
+  amount: number;
+  receiver: string;
+  comment?: string;
+  timestamp: Date | FieldValue;
+  metadata: Record<string, any>;
+}
+
+export interface UserTransaction extends Transaction {
+  type: "credit" | "debit";
 }
 
 export type SelectedRoute = {

@@ -2,13 +2,15 @@ import * as admin from "firebase-admin";
 import { auth } from "firebase-functions/v1";
 import { logger } from "firebase-functions/v2";
 import { onRequest } from "firebase-functions/v2/https";
+
 import { UserData } from "../types";
+
 
 export const initializeUserData = auth.user().onCreate((user) => {
   const userData: UserData = {
-    email: user.email,
     role: "passenger",
-    displayName: user.displayName,
+    email: user?.email || "",
+    displayName: user?.displayName || "",
   };
 
   return admin.firestore().collection("users").doc(user.uid).set(userData);
