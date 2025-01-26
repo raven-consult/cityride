@@ -1,7 +1,8 @@
 import React from "react";
 
 import { Stack } from "expo-router/stack";
-import * as SplashScreen from "expo-splash-screen";
+import * as TaskManager from "expo-task-manager";
+import * as Notifications from "expo-notifications";
 
 import auth from "@react-native-firebase/auth";
 import database from "@react-native-firebase/database";
@@ -11,21 +12,47 @@ import analytics from "@react-native-firebase/analytics";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
+import { ExpoNotification } from "@/types";
 import useDMSans from "@/design/fonts/DM_Sans";
 import AppContextProvider from "@/context/AppContext";
+import { addNotification } from "@/services/notifications";
 
+const NOTIFICATION_RECEIVED_TASK = "notification-received";
 
-SplashScreen.preventAutoHideAsync();
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldSetBadge: true,
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+  }),
+});
+
+type NotificationReceivedTaskData = { notification: ExpoNotification };
+
+TaskManager.defineTask<NotificationReceivedTaskData>(NOTIFICATION_RECEIVED_TASK, async ({ data, error }) => {
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  if (data) {
+    const notification = data.notification as ExpoNotification;
+    const sentTime = new Date(notification.sentTime);
+    const { title, body } = notification.data;
+    await addNotification({
+      title,
+      description: body,
+      date: new Date(sentTime),
+    });
+  }
+});
+
+Notifications.registerTaskAsync(NOTIFICATION_RECEIVED_TASK);
+
 
 
 const RootLayout = (): JSX.Element => {
   const [loaded] = useDMSans();
-
-  React.useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
 
   React.useEffect(() => {
     (async () => {

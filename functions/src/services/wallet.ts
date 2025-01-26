@@ -10,13 +10,18 @@ import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
 
 import { isAuthorized } from "../utils";
+import { InitializedTransaction, Transaction, UserTransaction, Wallet } from "../types";
 
 
 const kLastTransactionslimit = 10;
 const expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
 
+const firestore = admin.firestore();
+firestore.settings({ ignoreUndefinedProperties: true });
+
+
 export const createWallet = auth.user().onCreate((user) => {
-  return admin.firestore().collection("wallets").doc(user.uid).set({
+  return firestore.collection("wallets").doc(user.uid).set({
     balance: 0,
   });
 });
@@ -86,7 +91,7 @@ export const getWallet = onRequest(async (req, res) => {
 
   const { uid } = req.body;
 
-  const wallet = await admin.firestore().collection("wallets").doc(uid).get();
+  const wallet = await firestore.collection("wallets").doc(uid).get();
   if (!wallet.exists) {
     res.status(404).send("Wallet not found");
     return;
@@ -103,13 +108,13 @@ export const getLastTransactions = onRequest(async (req, res) => {
   const { uid } = req.body;
 
   const fetchRes = await Promise.all([
-    admin.firestore()
+    firestore
       .collection("transactions")
       .where("sender", "==", uid)
       .orderBy("timestamp", "desc")
       .limit(kLastTransactionslimit)
       .get(),
-    admin.firestore()
+    firestore
       .collection("transactions")
       .where("receiver", "==", uid)
       .orderBy("timestamp", "desc")
@@ -145,10 +150,10 @@ export const sendMoney = onRequest(async (req, res) => {
 
   const { title, sender, receiver, amount, comment } = req.body;
 
-  const walletsCollection = admin.firestore().collection("wallets");
-  const transactionsCollection = admin.firestore().collection("transactions");
+  const walletsCollection = firestore.collection("wallets");
+  const transactionsCollection = firestore.collection("transactions");
 
-  await admin.firestore().runTransaction(async (transaction) => {
+  await firestore.runTransaction(async (transaction) => {
     const senderWallet = await transaction.get(walletsCollection.doc(sender));
     const receiverWallet = await transaction.get(walletsCollection.doc(receiver));
 
@@ -195,7 +200,7 @@ export const checkIfUserCanPay = onRequest(async (req, res) => {
 
   const { uid, amount } = req.body;
 
-  const wallet = await admin.firestore().collection("wallets").doc(uid).get();
+  const wallet = await firestore.collection("wallets").doc(uid).get();
   if (!wallet.exists) {
     logger.error("User attempted to check if can pay with invalid wallet", { uid, amount });
     res.status(400).send("Wallet not found");
@@ -248,14 +253,14 @@ export const handlePaystackWebhook = onRequest(async (req, res) => {
 
   const transactionData = transaction.toJSON() as InitializedTransaction;
 
-  const userDoc = await admin.firestore().collection("users").doc(transactionData.sender).get();
+  const userDoc = await firestore.collection("users").doc(transactionData.sender).get();
   if (!userDoc.exists) {
     logger.error("User not found", transactionData);
     res.status(400).send("User not found");
     return;
   }
 
-  await admin.firestore().collection("wallets").doc(transactionData.sender).update({
+  await firestore.collection("wallets").doc(transactionData.sender).update({
     balance: FieldValue.increment(data.amount / 100),
   });
 
@@ -272,17 +277,17 @@ export const handlePaystackWebhook = onRequest(async (req, res) => {
   } satisfies Transaction;
 
   await transaction.ref.remove();
-  await admin.firestore().collection("transactions").doc(data.reference).set(resData);
+  await firestore.collection("transactions").doc(data.reference).set(resData);
   res.status(200).send("Transaction successful");
 });
 
 export const PassengerPayDriverForRide = (passengerId: string, driverId: string, amount: number, rideId: string) => {
   logger.info("Passenger paying driver for ride", { passengerId, driverId, amount, rideId });
 
-  const walletsCollection = admin.firestore().collection("wallets");
-  const transactionsCollection = admin.firestore().collection("transactions");
+  const walletsCollection = firestore.collection("wallets");
+  const transactionsCollection = firestore.collection("transactions");
 
-  return admin.firestore().runTransaction(async (transaction) => {
+  return firestore.runTransaction(async (transaction) => {
     const driverWallet = await transaction.get(walletsCollection.doc(driverId));
     const passengerWallet = await transaction.get(walletsCollection.doc(passengerId));
 
@@ -317,30 +322,4 @@ export const PassengerPayDriverForRide = (passengerId: string, driverId: string,
       },
     } satisfies Transaction);
   });
-}
-
-interface InitializedTransaction {
-  sender: string;
-  initialized: boolean;
-  date: typeof admin.database.ServerValue.TIMESTAMP;
-}
-
-interface Wallet {
-  id: string;
-  balance: number;
-}
-
-interface Transaction {
-  id?: string;
-  title: string;
-  sender: string;
-  amount: number;
-  timestamp: Date | FieldValue;
-  receiver: string;
-  comment?: string;
-  metadata: Record<string, any>;
-}
-
-interface UserTransaction extends Transaction {
-  type: "credit" | "debit";
 }

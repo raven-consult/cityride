@@ -17,16 +17,53 @@ export interface Station {
   coordinates: Coordinate;
 }
 
+export interface Wallet {
+  id: string;
+  balance: number;
+}
+
+export interface Transaction {
+  id: string;
+  title: string;
+  sender: string;
+  amount: number;
+  timestamp: Date;
+  receiver: string;
+  comment?: string;
+  type: "credit" | "debit";
+}
+
+export interface ExpoNotification {
+  sentTime: number;
+  data: {
+    title: string;
+    body: string;
+    message: string;
+    scopeKey: string;
+    channelId: string;
+    projectId: string;
+    experienceId: string;
+  };
+}
+
+export interface INotification {
+  date: Date;
+  title: string;
+  description: string;
+}
+
 export type Role = "passenger" | "driver";
+
+export interface DriverInfo {
+  carNumber: string;
+  maxPassengers: number;
+}
 
 export interface UserData {
   role: Role;
   email: string;
   displayName: string;
-  driverInfo?: {
-    carNumber: string;
-    maxPassengers: number;
-  };
+  driverInfo?: DriverInfo;
 }
 
 export interface Ride {

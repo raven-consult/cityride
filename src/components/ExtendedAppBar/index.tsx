@@ -55,6 +55,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     justifyContent: "flex-end",
-    height: (StatusBar.currentHeight || 30) + 64,
+    height: (StatusBar.currentHeight || 30) + 102,
   }
 });
