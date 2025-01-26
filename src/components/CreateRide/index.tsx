@@ -1,6 +1,6 @@
 import React from "react";
 
-import { View, StyleSheet } from "react-native";
+import { View } from "react-native";
 
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import RNBottomSheet, { BottomSheetBackgroundProps } from "@gorhom/bottom-sheet";
@@ -68,11 +68,7 @@ const CreateRide = (): JSX.Element => {
 
         setInfo({
           title: "Ride Created",
-          description: "Your ride has been created successfully",
-          illustration: "",
-          action: () => {
-            setInfo(null);
-          }
+          description: "Your ride has been created. When you’ve reached the departure point, please notify your passengers.",
         });
 
         setCreateRideMode(false);
