@@ -90,7 +90,6 @@ const CreateRide = (): JSX.Element => {
     }
   }, [createRideMode]);
 
-
   React.useEffect(() => {
     const subscriber = auth()
       .onAuthStateChanged((user: FirebaseAuthTypes.User | null) => {
@@ -110,7 +109,6 @@ const CreateRide = (): JSX.Element => {
         onPressNext={onPressNext}
       />
       <RNBottomSheet
-        index={-1}
         enableDynamicSizing
         ref={bottomSheetRef}
         snapPoints={snapPoints}
