@@ -8,14 +8,11 @@ import { isAuthorized } from "../utils";
 import { PassengerPayDriverForRide } from "./wallet";
 import { MapResponse, Passengers, Ride, Station, UserData } from "../types";
 
+import { firestore } from "../utils";
+
 
 // const kAllowedWaitTimeMins = 30;
 const MAPS_API_KEY = process.env.MAPS_API_KEY || "";
-
-export const database = admin.firestore();
-database.settings({
-  ignoreUndefinedProperties: true,
-});
 
 const expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
 
@@ -34,7 +31,7 @@ export const createRide = onRequest(async (req, res) => {
   const { driver, startStation, endStation, price } = (req.body as CreateRideRequest);
 
   // Check if driver is driver
-  const driverData = await database.collection("users").doc(driver).get();
+  const driverData = await firestore.collection("users").doc(driver).get();
   if (!driverData.exists) {
     logger.error("A User tried to create with ride with invalid driver", driver);
     res.status(400).send("Driver does not exist");
@@ -49,7 +46,7 @@ export const createRide = onRequest(async (req, res) => {
   }
 
   // Check if start is bus stops
-  const startStationDoc = await database.collection("stations").doc(startStation).get();
+  const startStationDoc = await firestore.collection("stations").doc(startStation).get();
   if (!startStationDoc.exists) {
     logger.error("A User tried to create with ride with invalid start point", driver);
     res.status(400).send("Start point does not exist");
@@ -58,7 +55,7 @@ export const createRide = onRequest(async (req, res) => {
   const startStationData = { ...startStationDoc.data(), id: startStationDoc.id } as Station;
 
   // Check if end is bus stops
-  const endStationDoc = await database.collection("stations").doc(endStation).get();
+  const endStationDoc = await firestore.collection("stations").doc(endStation).get();
   if (!endStationDoc.exists) {
     res.status(400).send("End point does not exist");
     logger.error("A User tried to create with ride with invalid destination point", driver);
@@ -71,7 +68,7 @@ export const createRide = onRequest(async (req, res) => {
   const timeMins = 5;
   const driverArrivalTimestamp = Date.now() + timeMins * 60 * 1000;
 
-  const rideId = database.collection("rides").doc().id;
+  const rideId = firestore.collection("rides").doc().id;
   const ride: Ride = {
     id: rideId,
     itenary: {
@@ -86,7 +83,7 @@ export const createRide = onRequest(async (req, res) => {
     }
   };
 
-  await database.collection("rides").doc(rideId).set(ride);
+  await firestore.collection("rides").doc(rideId).set(ride);
   await admin.database().ref(`/rides/${rideId}/passengers`).set({});
 
   res.status(200).send(ride);
@@ -104,7 +101,7 @@ export const getAvailableRides = onRequest(async (req, res) => {
 
   const { stationId } = (req.body as GetAvailableRidesRequest);
 
-  const rides = await database
+  const rides = await firestore
     .collection("rides")
     .where("itenary.start.id", "==", stationId)
     .get();
@@ -147,7 +144,7 @@ export const boardRide = onRequest(async (req, res) => {
 
   const { rideId, passengerId } = req.body;
 
-  const rideRef = database.collection("rides").doc(rideId);
+  const rideRef = firestore.collection("rides").doc(rideId);
   const ride = (await rideRef.get()).data() as Ride;
 
   const rideRtdbRef = admin.database().ref(`/rides/${rideId}`);
@@ -256,7 +253,7 @@ export const passengerCancelRide = onRequest(async (req, res) => {
   await passengersRef.child(`${passengerId}`).remove();
 
   // Notify driver
-  const rideRef = await database.collection("rides").doc(rideId).get();
+  const rideRef = await firestore.collection("rides").doc(rideId).get();
   const ride = { ...rideRef.data(), id: rideRef.id } as Ride;
 
   const driverNotificationToken = await admin
@@ -418,7 +415,7 @@ export const sendArrivalNotification = onRequest(async (req, res) => {
 
   const { rideId } = req.body;
 
-  const rideRef = await database.collection("rides").doc(rideId).get();
+  const rideRef = await firestore.collection("rides").doc(rideId).get();
   const ride = { ...rideRef.data(), id: rideRef.id } as Ride;
 
   if (!ride) {
