@@ -14,8 +14,14 @@ const RideTicket = (): JSX.Element => {
   if (!pendingRide || !(rideCode || CONTENT)) return <></>;
 
   const driverArrival = React.useMemo(() => {
-    const arrival = pendingRide?.metadata.driverArrival;
-    return `${arrival || 3} mins`;
+    const currentTimestamp = Date.now();
+    const arrivalTimestamp = pendingRide?.metadata.driverArrivalTimestamp || NaN;
+    const arrivalDelta = arrivalTimestamp - currentTimestamp;
+
+    if (isNaN(arrivalDelta)) return "N/A";
+
+    const arrival = Math.round(arrivalDelta / 1000 / 60);
+    return `${arrival} mins`;
   }, [pendingRide]);
 
   const itenary = React.useMemo(() => {
@@ -38,7 +44,7 @@ const RideTicket = (): JSX.Element => {
   }
 
   const maxPassengers = React.useMemo(() => {
-    return `${pendingRide?.metadata.maxPassengers || 3} seats`;
+    return `${pendingRide?.metadata.maxPassengers} seats`;
   }, [pendingRide]);
 
   return (

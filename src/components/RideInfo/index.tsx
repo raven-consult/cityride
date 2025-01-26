@@ -115,7 +115,13 @@ const RideInfo = (): JSX.Element => {
   }, [pendingRide]);
 
   const driverArrival = React.useMemo(() => {
-    const arrival = ride?.metadata.driverArrival;
+    const currentTimestamp = Date.now();
+    const arrivalTimestamp = ride?.metadata.driverArrivalTimestamp || NaN;
+    const arrivalDelta = arrivalTimestamp - currentTimestamp;
+
+    if (isNaN(arrivalDelta)) return "N/A";
+
+    const arrival = Math.round(arrivalDelta / 1000 / 60);
     return `${arrival} mins`;
   }, [ride]);
 
