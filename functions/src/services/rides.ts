@@ -4,8 +4,8 @@ import { onRequest } from "firebase-functions/v2/https";
 
 import { Expo, ExpoPushMessage } from "expo-server-sdk";
 
-import { isAuthorized } from "../utils";
 import { PassengerPayDriverForRide } from "./wallet";
+import { generateCode, isAuthorized } from "../utils";
 import { MapResponse, Passengers, Ride, Station, UserData } from "../types";
 
 import { firestore } from "../utils";
@@ -68,7 +68,7 @@ export const createRide = onRequest(async (req, res) => {
   const timeMins = 5;
   const driverArrivalTimestamp = Date.now() + timeMins * 60 * 1000;
 
-  const rideId = firestore.collection("rides").doc().id;
+  const rideId = generateCode(5);
   const ride: Ride = {
     id: rideId,
     itenary: {
@@ -471,9 +471,6 @@ export const sendArrivalNotification = onRequest(async (req, res) => {
 
   res.status(200).send("Arrival notification sent");
 });
-
-
-const generateCode = () => Math.random().toString(36).substring(2, 6);
 
 // @ts-ignore
 const getGMapsRoutes = async (station: Coordinate, user: Coordinate): Promise<MapResponse> => {
